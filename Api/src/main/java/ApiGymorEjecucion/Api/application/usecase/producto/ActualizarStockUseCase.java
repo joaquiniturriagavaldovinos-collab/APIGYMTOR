@@ -1,5 +1,6 @@
 package ApiGymorEjecucion.Api.application.usecase.producto;
 
+import ApiGymorEjecucion.Api.domain.exception.StockInsuficienteException;
 import ApiGymorEjecucion.Api.domain.model.producto.Producto;
 import ApiGymorEjecucion.Api.domain.repository.ProductoRepository;
 import org.springframework.stereotype.Service;

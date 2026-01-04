@@ -5,6 +5,7 @@ package ApiGymorEjecucion.Api.application.usecase.producto;
 import ApiGymorEjecucion.Api.domain.model.producto.Producto;
 import ApiGymorEjecucion.Api.domain.model.producto.Stock;
 import ApiGymorEjecucion.Api.domain.model.producto.TipoProducto;
+import ApiGymorEjecucion.Api.domain.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

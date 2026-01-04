@@ -1,6 +1,5 @@
 package ApiGymorEjecucion.Api.application.usecase.producto;
 
-
 import ApiGymorEjecucion.Api.domain.model.producto.Producto;
 import ApiGymorEjecucion.Api.domain.model.producto.TipoProducto;
 import ApiGymorEjecucion.Api.domain.repository.ProductoRepository;
@@ -25,26 +24,24 @@ public class ListarProductosUseCase {
         this.productoRepository = productoRepository;
     }
 
+    // ========================
+    // CASOS DE USO
+    // ========================
+
     /**
      * Lista todos los productos activos
-     *
-     * @return Lista de productos
      */
-    public List<ProductoResponse> listarTodos() {
-        List<Producto> productos = productoRepository.buscarTodos();
-        return productos.stream()
+    public List<ProductoListResponse> listarTodos() {
+        return productoRepository.buscarTodos().stream()
                 .filter(Producto::isActivo)
                 .map(this::mapearAResponse)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Lista productos por tipo (DISCO, MAQUINA, etc.)
-     *
-     * @param tipo Tipo de producto
-     * @return Lista de productos del tipo especificado
+     * Lista productos por tipo
      */
-    public List<ProductoResponse> listarPorTipo(String tipo) {
+    public List<ProductoListResponse> listarPorTipo(String tipo) {
         if (tipo == null || tipo.isBlank()) {
             throw new IllegalArgumentException("El tipo de producto es requerido");
         }
@@ -56,8 +53,7 @@ public class ListarProductosUseCase {
             throw new IllegalArgumentException("Tipo de producto inválido: " + tipo);
         }
 
-        List<Producto> productos = productoRepository.buscarPorTipo(tipoProducto);
-        return productos.stream()
+        return productoRepository.buscarPorTipo(tipoProducto).stream()
                 .filter(Producto::isActivo)
                 .map(this::mapearAResponse)
                 .collect(Collectors.toList());
@@ -65,12 +61,9 @@ public class ListarProductosUseCase {
 
     /**
      * Lista productos con stock disponible
-     *
-     * @return Lista de productos con stock > 0
      */
-    public List<ProductoResponse> listarConStock() {
-        List<Producto> productos = productoRepository.buscarTodos();
-        return productos.stream()
+    public List<ProductoListResponse> listarConStock() {
+        return productoRepository.buscarTodos().stream()
                 .filter(Producto::isActivo)
                 .filter(p -> p.getStockDisponible() > 0)
                 .map(this::mapearAResponse)
@@ -79,44 +72,42 @@ public class ListarProductosUseCase {
 
     /**
      * Busca un producto por su código
-     *
-     * @param codigo Código del producto
-     * @return Producto encontrado
      */
-    public ProductoResponse buscarPorCodigo(String codigo) {
+    public ProductoListResponse buscarPorCodigo(String codigo) {
         if (codigo == null || codigo.isBlank()) {
             throw new IllegalArgumentException("El código del producto es requerido");
         }
 
         Producto producto = productoRepository.buscarPorCodigo(codigo)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "No se encontró el producto con código: " + codigo
-                ));
+                .orElseThrow(() ->
+                        new IllegalArgumentException("No se encontró el producto con código: " + codigo)
+                );
 
         return mapearAResponse(producto);
     }
 
     /**
      * Busca un producto por su ID
-     *
-     * @param id ID del producto
-     * @return Producto encontrado
      */
-    public ProductoResponse buscarPorId(String id) {
+    public ProductoListResponse buscarPorId(String id) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("El ID del producto es requerido");
         }
 
         Producto producto = productoRepository.buscarPorId(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "No se encontró el producto con ID: " + id
-                ));
+                .orElseThrow(() ->
+                        new IllegalArgumentException("No se encontró el producto con ID: " + id)
+                );
 
         return mapearAResponse(producto);
     }
 
-    private ProductoResponse mapearAResponse(Producto producto) {
-        ProductoResponse response = new ProductoResponse();
+    // ========================
+    // MAPPER
+    // ========================
+
+    private ProductoListResponse mapearAResponse(Producto producto) {
+        ProductoListResponse response = new ProductoListResponse();
         response.setId(producto.getId());
         response.setCodigo(producto.getCodigo());
         response.setNombre(producto.getNombre());
@@ -126,14 +117,17 @@ public class ListarProductosUseCase {
         response.setPrecio(producto.getPrecio());
         response.setActivo(producto.isActivo());
         response.setStockDisponible(producto.getStockDisponible());
-        response.setFechaCreacion(producto.getFechaCreacion());
         response.setDisponibleParaVenta(producto.getStockDisponible() > 0);
+        response.setFechaCreacion(producto.getFechaCreacion());
         return response;
     }
 
-    // ===== DTO DE RESPUESTA =====
+    // ========================
+    // DTO DE RESPUESTA
+    // ========================
 
-    public static class ProductoResponse {
+    public static class ProductoListResponse {
+
         private String id;
         private String codigo;
         private String nombre;
@@ -146,7 +140,8 @@ public class ListarProductosUseCase {
         private boolean disponibleParaVenta;
         private LocalDateTime fechaCreacion;
 
-        // Getters y Setters
+        // Getters & Setters
+
         public String getId() {
             return id;
         }
@@ -199,9 +194,10 @@ public class ListarProductosUseCase {
             return precio;
         }
 
-        public void setPrecioContinuar(BigDecimal precio) {
+        public void setPrecio(BigDecimal precio) {
             this.precio = precio;
         }
+
         public boolean isActivo() {
             return activo;
         }
