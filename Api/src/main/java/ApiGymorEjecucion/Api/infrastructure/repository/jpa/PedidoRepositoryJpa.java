@@ -1,30 +1,22 @@
 package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 
-import ApiGymorEjecucion.Api.domain.model.pedido.EstadoPedido;
-import ApiGymorEjecucion.Api.domain.model.pedido.ItemPedido;
-import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
-import ApiGymorEjecucion.Api.domain.model.pedido.TipoItem;
+import ApiGymorEjecucion.Api.domain.model.pedido.*;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
 import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.PedidoEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
+import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
 /**
- * Implementación JPA del repositorio de Pedidos.
- *
- * ARQUITECTURA:
- * 1. PedidoJpaRepository (Spring Data) → Acceso directo a BD
- * 2. Esta clase (PedidoRepositoryJpa) → Adaptador que convierte Entity ↔ Domain
- *
- * NOTA: Descomenta @Primary cuando quieras usar BD en lugar de memoria
+ * Adaptador JPA para Pedido (Arquitectura Hexagonal + DDD)
  */
 @Repository
-// @Primary  // ← Descomentar para usar BD en lugar de memoria
+@Profile("prod")
 public class PedidoRepositoryJpa implements PedidoRepository {
 
     private final PedidoJpaRepository jpaRepository;
@@ -110,6 +102,13 @@ public class PedidoRepositoryJpa implements PedidoRepository {
                 .collect(Collectors.toList());
         entity.setItems(itemsEntity);
 
+        // Mapear historial de transiciones
+        List<PedidoEntity.TransicionEstadoEntity> historialEntity =
+                pedido.getHistorialEstados().stream()
+                        .map(this::mapearTransicionAEntity)
+                        .collect(Collectors.toList());
+        entity.setHistorialEstados(historialEntity);
+
         return entity;
     }
 
@@ -126,9 +125,43 @@ public class PedidoRepositoryJpa implements PedidoRepository {
                 items
         );
 
-        // Restaurar estado y otros campos mediante reflection o métodos package-private
-        // NOTA: Aquí necesitarías métodos especiales en Pedido para reconstruir desde BD
-        // Por simplicidad, este es un esquema básico
+        // Restaurar estado y campos mediante reflection (necesario porque el dominio es inmutable)
+        try {
+            // Restaurar estado
+            Field estadoField = Pedido.class.getDeclaredField("estado");
+            estadoField.setAccessible(true);
+            estadoField.set(pedido, EstadoPedido.valueOf(entity.getEstado().name()));
+
+            // Restaurar fecha de actualización
+            Field fechaActField = Pedido.class.getDeclaredField("fechaActualizacion");
+            fechaActField.setAccessible(true);
+            fechaActField.set(pedido, entity.getFechaActualizacion());
+
+            // Restaurar referencia de pago
+            if (entity.getReferenciaPago() != null) {
+                Field refPagoField = Pedido.class.getDeclaredField("referenciaPago");
+                refPagoField.setAccessible(true);
+                refPagoField.set(pedido, entity.getReferenciaPago());
+            }
+
+            // Restaurar guía de despacho
+            if (entity.getGuiaDespacho() != null) {
+                Field guiaField = Pedido.class.getDeclaredField("guiaDespacho");
+                guiaField.setAccessible(true);
+                guiaField.set(pedido, entity.getGuiaDespacho());
+            }
+
+            // Restaurar historial de estados
+            Field historialField = Pedido.class.getDeclaredField("historialEstados");
+            historialField.setAccessible(true);
+            List<TransicionEstado> historial = entity.getHistorialEstados().stream()
+                    .map(this::mapearTransicionADominio)
+                    .collect(Collectors.toList());
+            historialField.set(pedido, historial);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al reconstruir Pedido desde BD", e);
+        }
 
         return pedido;
     }
@@ -153,12 +186,29 @@ public class PedidoRepositoryJpa implements PedidoRepository {
                 entity.getPrecioUnitario()
         );
     }
-}
 
-/**
- * Spring Data JPA Repository (auto-implementado por Spring)
- */
-interface PedidoJpaRepository extends JpaRepository<PedidoEntity, String> {
-    List<PedidoEntity> findByClienteId(String clienteId);
-    List<PedidoEntity> findByEstado(PedidoEntity.EstadoPedidoEntity estado);
+    private PedidoEntity.TransicionEstadoEntity mapearTransicionAEntity(TransicionEstado trans) {
+        PedidoEntity.EstadoPedidoEntity estadoAnterior = trans.getEstadoAnterior() != null
+                ? PedidoEntity.EstadoPedidoEntity.valueOf(trans.getEstadoAnterior().name())
+                : null;
+
+        return new PedidoEntity.TransicionEstadoEntity(
+                estadoAnterior,
+                PedidoEntity.EstadoPedidoEntity.valueOf(trans.getEstadoNuevo().name()),
+                trans.getFechaTransicion(),
+                trans.getObservacion()
+        );
+    }
+
+    private TransicionEstado mapearTransicionADominio(PedidoEntity.TransicionEstadoEntity entity) {
+        EstadoPedido estadoAnterior = entity.getEstadoAnterior() != null
+                ? EstadoPedido.valueOf(entity.getEstadoAnterior().name())
+                : null;
+
+        return TransicionEstado.crear(
+                estadoAnterior,
+                EstadoPedido.valueOf(entity.getEstadoNuevo().name()),
+                entity.getObservacion()
+        );
+    }
 }

@@ -1,10 +1,9 @@
 package ApiGymorEjecucion.Api.infrastructure.repository.memory;
 
-
-
 import ApiGymorEjecucion.Api.domain.model.pedido.EstadoPedido;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -19,9 +18,10 @@ import java.util.stream.Collectors;
  * Utiliza ConcurrentHashMap para thread-safety.
  *
  * NOTA: Los datos se pierden al reiniciar la aplicación.
- * Esta implementación es temporal para desarrollo inicial.
+ * Esta implementación es para desarrollo local.
  */
 @Repository
+@Profile("local")  // ← AGREGADO: Solo se activa con spring.profiles.active=local
 public class PedidoRepositoryInMemory implements PedidoRepository {
 
     private final Map<String, Pedido> pedidos = new ConcurrentHashMap<>();

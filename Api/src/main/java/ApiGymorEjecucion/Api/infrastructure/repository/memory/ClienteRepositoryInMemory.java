@@ -4,6 +4,7 @@ package ApiGymorEjecucion.Api.infrastructure.repository.memory;
 import ApiGymorEjecucion.Api.domain.model.Cliente.Cliente;
 import ApiGymorEjecucion.Api.domain.model.Cliente.TipoCliente;
 import ApiGymorEjecucion.Api.domain.repository.ClienteRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
  * Implementación en memoria del repositorio de Clientes
  */
 @Repository
+@Profile("local")
 public class ClienteRepositoryInMemory implements ClienteRepository {
 
     private final Map<String, Cliente> clientes = new ConcurrentHashMap<>();

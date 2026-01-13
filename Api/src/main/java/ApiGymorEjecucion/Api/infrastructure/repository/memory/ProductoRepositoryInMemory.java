@@ -4,6 +4,7 @@ package ApiGymorEjecucion.Api.infrastructure.repository.memory;
 import ApiGymorEjecucion.Api.domain.model.producto.Producto;
 import ApiGymorEjecucion.Api.domain.model.producto.TipoProducto;
 import ApiGymorEjecucion.Api.domain.repository.ProductoRepository;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
  * Implementación en memoria del repositorio de Productos
  */
 @Repository
+@Profile("local")
+
 public class ProductoRepositoryInMemory implements ProductoRepository {
 
     private final Map<String, Producto> productos = new ConcurrentHashMap<>();
