@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * Implementación en memoria del repositorio de Productos
  */
 @Repository
-@Profile("local")
+@Profile({"local", "test"})
 
 public class ProductoRepositoryInMemory implements ProductoRepository {
 

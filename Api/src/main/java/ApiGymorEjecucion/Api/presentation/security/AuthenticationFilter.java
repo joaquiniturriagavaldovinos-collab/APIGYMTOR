@@ -60,10 +60,12 @@ public class AuthenticationFilter extends OncePerRequestFilter {
      * Define rutas que no requieren autenticación
      */
     private boolean esRutaPublica(String path) {
-        return path.startsWith("/api/webhooks") ||  // Webhooks externos
-                path.equals("/api/productos") ||      // Catálogo público
-                path.startsWith("/api/productos/");   // Detalle de productos
+        return path.startsWith("/api/webhooks") ||      // Webhooks externos
+                path.equals("/api/productos") ||          // Catálogo
+                path.startsWith("/api/productos/") ||     // Detalle producto
+                path.equals("/api/clientes");             // Registro cliente
     }
+
 
     /**
      * Valida el token JWT (MOCK)

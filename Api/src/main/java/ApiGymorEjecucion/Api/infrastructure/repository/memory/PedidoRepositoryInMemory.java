@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * Esta implementación es para desarrollo local.
  */
 @Repository
-@Profile("local")  // ← AGREGADO: Solo se activa con spring.profiles.active=local
+@Profile({"local", "test"})
 public class PedidoRepositoryInMemory implements PedidoRepository {
 
     private final Map<String, Pedido> pedidos = new ConcurrentHashMap<>();

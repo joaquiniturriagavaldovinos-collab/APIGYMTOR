@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  * Implementación en memoria del repositorio de Clientes
  */
 @Repository
-@Profile("local")
+@Profile({"local", "test"})
 public class ClienteRepositoryInMemory implements ClienteRepository {
 
     private final Map<String, Cliente> clientes = new ConcurrentHashMap<>();
