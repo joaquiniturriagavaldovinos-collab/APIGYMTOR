@@ -2,7 +2,7 @@ package ApiGymorEjecucion.Api.application.usecase.pedido;
 
 
 
-import ApiGymorEjecucion.Api.application.dto.response.PedidoResponse;
+import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
 import ApiGymorEjecucion.Api.application.mapper.PedidoMapper;
 import ApiGymorEjecucion.Api.domain.exception.PedidoNoEncontradoException;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;

@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.application.dto.response;
+package ApiGymorEjecucion.Api.application.dto.response.pedido;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

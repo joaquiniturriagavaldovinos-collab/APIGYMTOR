@@ -1,9 +1,9 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
 
+import ApiGymorEjecucion.Api.application.dto.request.cliente.RegistrarClienteRequest;
+import ApiGymorEjecucion.Api.application.dto.response.cliente.ClienteResponse;
 import ApiGymorEjecucion.Api.application.usecase.cliente.RegistrarClienteUseCase;
-import ApiGymorEjecucion.Api.application.usecase.cliente.RegistrarClienteUseCase.ClienteResponse;
-import ApiGymorEjecucion.Api.application.usecase.cliente.RegistrarClienteUseCase.RegistrarClienteRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

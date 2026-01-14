@@ -1,19 +1,28 @@
-package ApiGymorEjecucion.Api.application.dto.response;
+package ApiGymorEjecucion.Api.application.dto.request.pedido;
+
 import java.math.BigDecimal;
 
 /**
- * DTO de respuesta para un item del pedido
+ * DTO para un item dentro de la solicitud de pedido
  */
-public class ItemPedidoResponse {
+public class ItemPedidoRequest {
     private String productoId;
     private String nombre;
-    private String tipo;
+    private String tipo; // "PRODUCTO_FISICO" o "SERVICIO"
     private int cantidad;
     private BigDecimal precioUnitario;
-    private BigDecimal subtotal;
 
     // Constructors
-    public ItemPedidoResponse() {
+    public ItemPedidoRequest() {
+    }
+
+    public ItemPedidoRequest(String productoId, String nombre, String tipo,
+                             int cantidad, BigDecimal precioUnitario) {
+        this.productoId = productoId;
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.cantidad = cantidad;
+        this.precioUnitario = precioUnitario;
     }
 
     // Getters y Setters
@@ -56,13 +65,4 @@ public class ItemPedidoResponse {
     public void setPrecioUnitario(BigDecimal precioUnitario) {
         this.precioUnitario = precioUnitario;
     }
-
-    public BigDecimal getSubtotal() {
-        return subtotal;
-    }
-
-    public void setSubtotal(BigDecimal subtotal) {
-        this.subtotal = subtotal;
-    }
 }
-

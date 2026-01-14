@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.application.dto.request;
+package ApiGymorEjecucion.Api.application.dto.request.pago;
 /**
  * DTO para solicitud de inicio de pago
  */

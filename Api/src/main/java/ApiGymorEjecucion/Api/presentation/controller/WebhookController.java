@@ -1,8 +1,8 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
 
-import ApiGymorEjecucion.Api.application.dto.request.ConfirmarPagoRequest;
-import ApiGymorEjecucion.Api.application.dto.response.PedidoResponse;
+import ApiGymorEjecucion.Api.application.dto.request.pago.ConfirmarPagoRequest;
+import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
 import ApiGymorEjecucion.Api.application.usecase.pedido.ConfirmarResultadoPagoUseCase;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

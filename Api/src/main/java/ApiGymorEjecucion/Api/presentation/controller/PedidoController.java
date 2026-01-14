@@ -1,9 +1,9 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
 
-import ApiGymorEjecucion.Api.application.dto.request.CrearPedidoRequest;
-import ApiGymorEjecucion.Api.application.dto.request.DespacharPedidoRequest;
-import ApiGymorEjecucion.Api.application.dto.response.PedidoResponse;
+import ApiGymorEjecucion.Api.application.dto.request.pedido.CrearPedidoRequest;
+import ApiGymorEjecucion.Api.application.dto.request.pedido.DespacharPedidoRequest;
+import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
 import ApiGymorEjecucion.Api.application.usecase.pedido.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -2,8 +2,8 @@ package ApiGymorEjecucion.Api.application.usecase.pedido;
 
 
 
-import ApiGymorEjecucion.Api.application.dto.request.CrearPedidoRequest;
-import ApiGymorEjecucion.Api.application.dto.response.PedidoResponse;
+import ApiGymorEjecucion.Api.application.dto.request.pedido.CrearPedidoRequest;
+import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
 import ApiGymorEjecucion.Api.application.mapper.PedidoMapper;
 import ApiGymorEjecucion.Api.domain.model.pedido.ItemPedido;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;

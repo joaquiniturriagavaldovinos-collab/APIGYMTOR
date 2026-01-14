@@ -2,9 +2,9 @@ package ApiGymorEjecucion.Api.application.mapper;
 
 
 
-import ApiGymorEjecucion.Api.application.dto.request.ItemPedidoRequest;
-import ApiGymorEjecucion.Api.application.dto.response.ItemPedidoResponse;
-import ApiGymorEjecucion.Api.application.dto.response.PedidoResponse;
+import ApiGymorEjecucion.Api.application.dto.request.pedido.ItemPedidoRequest;
+import ApiGymorEjecucion.Api.application.dto.response.pedido.ItemPedidoResponse;
+import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
 import ApiGymorEjecucion.Api.domain.model.pedido.ItemPedido;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
 import ApiGymorEjecucion.Api.domain.model.pedido.TipoItem;

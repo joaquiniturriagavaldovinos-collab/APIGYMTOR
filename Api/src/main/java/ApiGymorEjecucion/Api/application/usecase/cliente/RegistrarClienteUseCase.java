@@ -1,5 +1,8 @@
 package ApiGymorEjecucion.Api.application.usecase.cliente;
 
+import ApiGymorEjecucion.Api.application.dto.request.cliente.DireccionRequest;
+import ApiGymorEjecucion.Api.application.dto.request.cliente.RegistrarClienteRequest;
+import ApiGymorEjecucion.Api.application.dto.response.cliente.ClienteResponse;
 import ApiGymorEjecucion.Api.domain.model.Cliente.Cliente;
 import ApiGymorEjecucion.Api.domain.model.Cliente.DireccionEntrega;
 import ApiGymorEjecucion.Api.domain.model.Cliente.TipoCliente;
@@ -58,9 +61,11 @@ public class RegistrarClienteUseCase {
 
         // Agregar dirección si viene en el request
         if (request.getDireccion() != null) {
-            DireccionEntrega direccion = crearDireccionDesdeRequest(request.getDireccion());
+            DireccionEntrega direccion =
+                    crearDireccionDesdeRequest(request.getDireccion());
             cliente.agregarDireccion(direccion);
         }
+
 
         // Persistir
         Cliente clienteGuardado = clienteRepository.guardar(cliente);
@@ -79,6 +84,9 @@ public class RegistrarClienteUseCase {
         if (request.getApellido() == null || request.getApellido().isBlank()) {
             throw new IllegalArgumentException("El apellido es requerido");
         }
+
+
+
         if (request.getEmail() == null || request.getEmail().isBlank()) {
             throw new IllegalArgumentException("El email es requerido");
         }
@@ -99,23 +107,27 @@ public class RegistrarClienteUseCase {
         return "CLI-" + System.currentTimeMillis();
     }
 
-    private DireccionEntrega crearDireccionDesdeRequest(DireccionRequest direccionRequest) {
+    private DireccionEntrega crearDireccionDesdeRequest(DireccionRequest request) {
         return DireccionEntrega.crear(
-                direccionRequest.getCalle(),
-                direccionRequest.getNumero(),
-                direccionRequest.getComuna(),
-                direccionRequest.getCiudad(),
-                direccionRequest.getRegion(),
-                direccionRequest.getCodigoPostal(),
-                direccionRequest.getReferencia()
+                request.getCalle(),
+                request.getNumero(),
+                request.getComuna(),
+                request.getCiudad(),
+                request.getRegion(),
+                request.getCodigoPostal(),
+                request.getReferencia()
         );
     }
+
 
     private ClienteResponse mapearAResponse(Cliente cliente) {
         ClienteResponse response = new ClienteResponse();
         response.setId(cliente.getId());
         response.setNombre(cliente.getNombre());
         response.setApellido(cliente.getApellido());
+        response.setNombreCompleto(
+                cliente.getNombre() + " " + cliente.getApellido()
+        );
         response.setEmail(cliente.getEmail());
         response.setTelefono(cliente.getTelefono());
         response.setRut(cliente.getRut());
@@ -133,242 +145,5 @@ public class RegistrarClienteUseCase {
         return response;
     }
 
-    // ===== DTOs INTERNOS =====
 
-    public static class RegistrarClienteRequest {
-        private String nombre;
-        private String apellido;
-        private String email;
-        private String telefono;
-        private String rut;
-        private String tipo; // "MINORISTA" o "MAYORISTA"
-        private DireccionRequest direccion;
-
-        // Getters y Setters
-        public String getNombre() {
-            return nombre;
-        }
-
-        public void setNombre(String nombre) {
-            this.nombre = nombre;
-        }
-
-        public String getApellido() {
-            return apellido;
-        }
-
-        public void setApellido(String apellido) {
-            this.apellido = apellido;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getTelefono() {
-            return telefono;
-        }
-
-        public void setTelefono(String telefono) {
-            this.telefono = telefono;
-        }
-
-        public String getRut() {
-            return rut;
-        }
-
-        public void setRut(String rut) {
-            this.rut = rut;
-        }
-
-        public String getTipo() {
-            return tipo;
-        }
-
-        public void setTipo(String tipo) {
-            this.tipo = tipo;
-        }
-
-        public DireccionRequest getDireccion() {
-            return direccion;
-        }
-
-        public void setDireccion(DireccionRequest direccion) {
-            this.direccion = direccion;
-        }
-    }
-
-    public static class DireccionRequest {
-        private String calle;
-        private String numero;
-        private String comuna;
-        private String ciudad;
-        private String region;
-        private String codigoPostal;
-        private String referencia;
-
-        // Getters y Setters
-        public String getCalle() {
-            return calle;
-        }
-
-        public void setCalle(String calle) {
-            this.calle = calle;
-        }
-
-        public String getNumero() {
-            return numero;
-        }
-
-        public void setNumero(String numero) {
-            this.numero = numero;
-        }
-
-        public String getComuna() {
-            return comuna;
-        }
-
-        public void setComuna(String comuna) {
-            this.comuna = comuna;
-        }
-
-        public String getCiudad() {
-            return ciudad;
-        }
-
-        public void setCiudad(String ciudad) {
-            this.ciudad = ciudad;
-        }
-
-        public String getRegion() {
-            return region;
-        }
-
-        public void setRegion(String region) {
-            this.region = region;
-        }
-
-        public String getCodigoPostal() {
-            return codigoPostal;
-        }
-
-        public void setCodigoPostal(String codigoPostal) {
-            this.codigoPostal = codigoPostal;
-        }
-
-        public String getReferencia() {
-            return referencia;
-        }
-
-        public void setReferencia(String referencia) {
-            this.referencia = referencia;
-        }
-    }
-
-    public static class ClienteResponse {
-        private String id;
-        private String nombre;
-        private String apellido;
-        private String email;
-        private String telefono;
-        private String rut;
-        private String tipo;
-        private String tipoDescripcion;
-        private boolean activo;
-        private java.time.LocalDateTime fechaRegistro;
-        private String direccionPrincipal;
-
-        // Getters y Setters
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public String getNombre() {
-            return nombre;
-        }
-
-        public void setNombre(String nombre) {
-            this.nombre = nombre;
-        }
-
-        public String getApellido() {
-            return apellido;
-        }
-
-        public void setApellido(String apellido) {
-            this.apellido = apellido;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getTelefono() {
-            return telefono;
-        }
-
-        public void setTelefono(String telefono) {
-            this.telefono = telefono;
-        }
-
-        public String getRut() {
-            return rut;
-        }
-
-        public void setRut(String rut) {
-            this.rut = rut;
-        }
-
-        public String getTipo() {
-            return tipo;
-        }
-
-        public void setTipo(String tipo) {
-            this.tipo = tipo;
-        }
-
-        public String getTipoDescripcion() {
-            return tipoDescripcion;
-        }
-
-        public void setTipoDescripcion(String tipoDescripcion) {
-            this.tipoDescripcion = tipoDescripcion;
-        }
-
-        public boolean isActivo() {
-            return activo;
-        }
-
-        public void setActivo(boolean activo) {
-            this.activo = activo;
-        }
-
-        public java.time.LocalDateTime getFechaRegistro() {
-            return fechaRegistro;
-        }
-
-        public void setFechaRegistro(java.time.LocalDateTime fechaRegistro) {
-            this.fechaRegistro = fechaRegistro;
-        }
-
-        public String getDireccionPrincipal() {
-            return direccionPrincipal;
-        }
-
-        public void setDireccionPrincipal(String direccionPrincipal) {
-            this.direccionPrincipal = direccionPrincipal;
-        }
-    }
 }
