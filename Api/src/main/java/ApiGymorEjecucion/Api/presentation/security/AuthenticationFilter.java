@@ -1,21 +1,26 @@
 package ApiGymorEjecucion.Api.presentation.security;
 
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Filtro de autenticación JWT (MOCK para desarrollo)
  *
- * NOTA: Esta es una implementación básica.
- * En producción deberías usar Spring Security con JWT real.
+ * ⚠️ En producción:
+ * - Usar Spring Security con JWT real
+ * - Validar firma, expiración y roles
  */
 @Component
 public class AuthenticationFilter extends OncePerRequestFilter {
@@ -27,37 +32,59 @@ public class AuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+            FilterChain filterChain)
+            throws ServletException, IOException {
 
-        // Rutas públicas (sin autenticación)
         String path = request.getRequestURI();
+
+        // Rutas públicas
         if (esRutaPublica(path)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Obtener token del header
+        // Header Authorization
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token no proporcionado");
+            escribirError(
+                    response,
+                    request,
+                    HttpStatus.UNAUTHORIZED,
+                    "Token no proporcionado"
+            );
             return;
         }
 
         String token = authHeader.substring(BEARER_PREFIX.length());
 
-        // Validar token (MOCK - en producción usa JWT real)
+        // Validación MOCK
         if (!validarToken(token)) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido");
+            escribirError(
+                    response,
+                    request,
+                    HttpStatus.UNAUTHORIZED,
+                    "Token inválido"
+            );
             return;
         }
 
-        // Token válido - continuar con la petición
+        //  MOCK: setear contexto de seguridad
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        "mock-user-id", // en JWT real: userId
+                        null,
+                        List.of() // en JWT real: roles
+                );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Continuar flujo
         filterChain.doFilter(request, response);
     }
 
     /**
-     * Define rutas que no requieren autenticación
+     * Define rutas públicas (sin JWT)
      */
     private boolean esRutaPublica(String path) {
         return path.startsWith("/api/webhooks") ||      // Webhooks externos
@@ -66,38 +93,41 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                 path.equals("/api/clientes");             // Registro cliente
     }
 
-
     /**
-     * Valida el token JWT (MOCK)
-     *
-     * TODO: Implementar validación real con:
-     * - Verificación de firma
-     * - Verificación de expiración
-     * - Extracción de claims (userId, roles, etc.)
+     * Validación JWT MOCK
      */
     private boolean validarToken(String token) {
-        // MOCK: Acepta cualquier token no vacío
         return token != null && !token.isBlank();
+    }
 
-        // En producción sería algo como:
-        // try {
-        //     Claims claims = Jwts.parser()
-        //         .setSigningKey(SECRET_KEY)
-        //         .parseClaimsJws(token)
-        //         .getBody();
-        //
-        //     // Verificar expiración
-        //     if (claims.getExpiration().before(new Date())) {
-        //         return false;
-        //     }
-        //
-        //     // Extraer información del usuario
-        //     String userId = claims.getSubject();
-        //     // ... guardar en contexto de seguridad
-        //
-        //     return true;
-        // } catch (JwtException e) {
-        //     return false;
-        // }
+    /**
+     * Escritura de error JSON consistente con GlobalExceptionHandler
+     */
+    private void escribirError(
+            HttpServletResponse response,
+            HttpServletRequest request,
+            HttpStatus status,
+            String mensaje) throws IOException {
+
+        response.setStatus(status.value());
+        response.setContentType("application/json");
+
+        String body = """
+                {
+                  "status": %d,
+                  "error": "%s",
+                  "message": "%s",
+                  "timestamp": "%s",
+                  "path": "%s"
+                }
+                """.formatted(
+                status.value(),
+                status.getReasonPhrase(),
+                mensaje,
+                LocalDateTime.now(),
+                request.getRequestURI()
+        );
+
+        response.getWriter().write(body);
     }
 }
