@@ -3,7 +3,7 @@ package ApiGymorEjecucion.Api.application.dto.response.servicio;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public static class ServicioResponse {
+public class ServicioResponse {
     private String id;
     private String nombre;
     private String descripcion;

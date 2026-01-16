@@ -1,10 +1,17 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
+import ApiGymorEjecucion.Api.application.dto.response.dashboard.MetricasGeneralesResponse;
+import ApiGymorEjecucion.Api.application.dto.response.dashboard.ProductoTopResponse;
+import ApiGymorEjecucion.Api.application.usecase.dashboard.ObtenerMetricasGeneralesUseCase;
+import ApiGymorEjecucion.Api.application.usecase.dashboard.ObtenerResumenVentasUseCase;
+import ApiGymorEjecucion.Api.application.usecase.dashboard.ObtenerTopProductosUseCase;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Controller REST para métricas y dashboard administrativo
@@ -13,63 +20,48 @@ import java.time.LocalDate;
 @RequestMapping("/api/dashboard")
 public class DashboardController {
 
-    /**
-     * Obtener resumen de métricas
-     * GET /api/dashboard/resumen
-     */
-    @GetMapping("/resumen")
-    public ResponseEntity<ResumenDashboard> obtenerResumen(
-            @RequestParam(required = false) LocalDate desde,
-            @RequestParam(required = false) LocalDate hasta) {
+    private final ObtenerMetricasGeneralesUseCase obtenerMetricasGeneralesUseCase;
+    private final ObtenerResumenVentasUseCase obtenerResumenVentasUseCase;
+    private final ObtenerTopProductosUseCase obtenerTopProductosUseCase;
 
-        // TODO: Implementar ObtenerResumenDashboardUseCase
-        return ResponseEntity.ok().build();
+    public DashboardController(
+            ObtenerMetricasGeneralesUseCase obtenerMetricasGeneralesUseCase,
+            ObtenerResumenVentasUseCase obtenerResumenVentasUseCase,
+            ObtenerTopProductosUseCase obtenerTopProductosUseCase
+    ) {
+        this.obtenerMetricasGeneralesUseCase = obtenerMetricasGeneralesUseCase;
+        this.obtenerResumenVentasUseCase = obtenerResumenVentasUseCase;
+        this.obtenerTopProductosUseCase = obtenerTopProductosUseCase;
     }
 
-    /**
-     * Ventas por día
-     * GET /api/dashboard/ventas-diarias
-     */
-    @GetMapping("/ventas-diarias")
-    public ResponseEntity<?> obtenerVentasDiarias(
-            @RequestParam LocalDate desde,
-            @RequestParam LocalDate hasta) {
-
-        // TODO: Implementar ObtenerVentasDiariasUseCase
-        return ResponseEntity.ok().build();
+    // 1️⃣ Métricas generales del sistema
+    @GetMapping("/metricas-generales")
+    public ResponseEntity<MetricasGeneralesResponse> obtenerMetricasGenerales() {
+        return ResponseEntity.ok(
+                obtenerMetricasGeneralesUseCase.ejecutar()
+        );
     }
 
-    /**
-     * Productos más vendidos
-     * GET /api/dashboard/productos-top
-     */
-    @GetMapping("/productos-top")
-    public ResponseEntity<?> obtenerProductosTop(
-            @RequestParam(defaultValue = "10") int limit) {
-
-        // TODO: Implementar ObtenerProductosTopUseCase
-        return ResponseEntity.ok().build();
+    // 2️⃣ Resumen de ventas (rango de fechas opcional)
+    @GetMapping("/ventas/resumen")
+    public ResponseEntity<ObtenerResumenVentasUseCase.ResumenVentasResponse> obtenerResumenVentas(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate hasta
+    ) {
+        return ResponseEntity.ok(
+                obtenerResumenVentasUseCase.ejecutar(desde, hasta)
+        );
     }
 
-    /**
-     * Estado de pedidos
-     * GET /api/dashboard/estados-pedidos
-     */
-    @GetMapping("/estados-pedidos")
-    public ResponseEntity<?> obtenerEstadosPedidos() {
-        // TODO: Implementar ObtenerDistribucionEstadosUseCase
-        return ResponseEntity.ok().build();
-    }
-
-    // DTOs
-    public static class ResumenDashboard {
-        private long totalPedidos;
-        private long pedidosCompletados;
-        private long pedidosPendientes;
-        private BigDecimal ventasTotales;
-        private BigDecimal ventasDelDia;
-        private long clientesNuevos;
-        private long productosConBajoStock;
-        // getters/setters
+    // 3️⃣ Top productos más vendidos
+    @GetMapping("/productos/top")
+    public ResponseEntity<List<ProductoTopResponse>> obtenerTopProductos(
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        return ResponseEntity.ok(
+                obtenerTopProductosUseCase.ejecutar(limit)
+        );
     }
 }

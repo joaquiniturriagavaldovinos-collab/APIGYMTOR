@@ -1,6 +1,9 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
 
+import ApiGymorEjecucion.Api.application.dto.response.producto.ActualizarStockResponse;
+import ApiGymorEjecucion.Api.application.dto.response.producto.ProductoListResponse;
+import ApiGymorEjecucion.Api.application.dto.response.producto.ProductoResponse;
 import ApiGymorEjecucion.Api.application.usecase.producto.ActualizarStockUseCase;
 import ApiGymorEjecucion.Api.application.usecase.producto.CrearProductoUseCase;
 import ApiGymorEjecucion.Api.application.usecase.producto.ListarProductosUseCase;
@@ -24,125 +27,106 @@ public class ProductoController {
     public ProductoController(
             CrearProductoUseCase crearProductoUseCase,
             ListarProductosUseCase listarProductosUseCase,
-            ActualizarStockUseCase actualizarStockUseCase) {
+            ActualizarStockUseCase actualizarStockUseCase
+    ) {
         this.crearProductoUseCase = crearProductoUseCase;
         this.listarProductosUseCase = listarProductosUseCase;
         this.actualizarStockUseCase = actualizarStockUseCase;
     }
 
-    /**
-     * Crear un nuevo producto
-     * POST /api/productos
-     */
+    // =========================
+    // 📦 PRODUCTOS
+    // =========================
+
+    // 1️⃣ Crear producto
     @PostMapping
-    public ResponseEntity<CrearProductoUseCase.ProductoResponse> crearProducto(
-            @RequestBody CrearProductoUseCase.CrearProductoRequest request) {
-
-        CrearProductoUseCase.ProductoResponse response = crearProductoUseCase.ejecutar(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+    public ResponseEntity<ProductoResponse> crearProducto(
+            @RequestBody CrearProductoUseCase.CrearProductoRequest request
+    ) {
+        ProductoResponse response = crearProductoUseCase.ejecutar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Listar todos los productos
-     * GET /api/productos
-     */
+    // 2️⃣ Listar todos los productos activos
     @GetMapping
-    public ResponseEntity<List<ListarProductosUseCase.ProductoListResponse>> listarProductos() {
-        List<ListarProductosUseCase.ProductoListResponse> productos = listarProductosUseCase.listarTodos();
-        return ResponseEntity.ok(productos);
+    public ResponseEntity<List<ProductoListResponse>> listarProductos() {
+        return ResponseEntity.ok(
+                listarProductosUseCase.listarTodos()
+        );
     }
 
-    /**
-     * Listar productos por tipo
-     * GET /api/productos/tipo/{tipo}
-     */
+    // 3️⃣ Listar productos por tipo
     @GetMapping("/tipo/{tipo}")
-    public ResponseEntity<List<ListarProductosUseCase.ProductoListResponse>> listarPorTipo(
-            @PathVariable String tipo) {
-
-        List<ListarProductosUseCase.ProductoListResponse> productos =
-                listarProductosUseCase.listarPorTipo(tipo);
-        return ResponseEntity.ok(productos);
+    public ResponseEntity<List<ProductoListResponse>> listarPorTipo(
+            @PathVariable String tipo
+    ) {
+        return ResponseEntity.ok(
+                listarProductosUseCase.listarPorTipo(tipo)
+        );
     }
 
-    /**
-     * Listar productos con stock disponible
-     * GET /api/productos/con-stock
-     */
+    // 4️⃣ Listar productos con stock disponible
     @GetMapping("/con-stock")
-    public ResponseEntity<List<ListarProductosUseCase.ProductoListResponse>> listarConStock() {
-        List<ListarProductosUseCase.ProductoListResponse> productos =
-                listarProductosUseCase.listarConStock();
-        return ResponseEntity.ok(productos);
+    public ResponseEntity<List<ProductoListResponse>> listarConStock() {
+        return ResponseEntity.ok(
+                listarProductosUseCase.listarConStock()
+        );
     }
 
-    /**
-     * Buscar producto por código
-     * GET /api/productos/codigo/{codigo}
-     */
-    @GetMapping("/codigo/{codigo}")
-    public ResponseEntity<ListarProductosUseCase.ProductoListResponse> buscarPorCodigo(
-            @PathVariable String codigo) {
-
-        ListarProductosUseCase.ProductoListResponse producto =
-                listarProductosUseCase.buscarPorCodigo(codigo);
-        return ResponseEntity.ok(producto);
-    }
-
-    /**
-     * Buscar producto por ID
-     * GET /api/productos/{id}
-     */
+    // 5️⃣ Obtener producto por ID
     @GetMapping("/{id}")
-    public ResponseEntity<ListarProductosUseCase.ProductoListResponse> buscarPorId(
-            @PathVariable String id) {
-
-        ListarProductosUseCase.ProductoListResponse producto =
-                listarProductosUseCase.buscarPorId(id);
-        return ResponseEntity.ok(producto);
+    public ResponseEntity<ProductoListResponse> obtenerPorId(
+            @PathVariable String id
+    ) {
+        return ResponseEntity.ok(
+                listarProductosUseCase.buscarPorId(id)
+        );
     }
 
-    /**
-     * Incrementar stock de un producto
-     * POST /api/productos/{id}/stock/incrementar
-     */
+    // 6️⃣ Obtener producto por código
+    @GetMapping("/codigo/{codigo}")
+    public ResponseEntity<ProductoListResponse> obtenerPorCodigo(
+            @PathVariable String codigo
+    ) {
+        return ResponseEntity.ok(
+                listarProductosUseCase.buscarPorCodigo(codigo)
+        );
+    }
+
+    // =========================
+    // 📊 STOCK
+    // =========================
+
+    // 7️⃣ Incrementar stock
     @PostMapping("/{id}/stock/incrementar")
-    public ResponseEntity<ActualizarStockUseCase.ActualizarStockResponse> incrementarStock(
+    public ResponseEntity<ActualizarStockResponse> incrementarStock(
             @PathVariable String id,
-            @RequestParam int cantidad) {
-
-        ActualizarStockUseCase.ActualizarStockResponse response =
-                actualizarStockUseCase.incrementarStock(id, cantidad);
-        return ResponseEntity.ok(response);
+            @RequestParam int cantidad
+    ) {
+        return ResponseEntity.ok(
+                actualizarStockUseCase.incrementarStock(id, cantidad)
+        );
     }
 
-    /**
-     * Decrementar stock de un producto
-     * POST /api/productos/{id}/stock/decrementar
-     */
+    // 8️⃣ Decrementar stock
     @PostMapping("/{id}/stock/decrementar")
-    public ResponseEntity<ActualizarStockUseCase.ActualizarStockResponse> decrementarStock(
+    public ResponseEntity<ActualizarStockResponse> decrementarStock(
             @PathVariable String id,
-            @RequestParam int cantidad) {
-
-        ActualizarStockUseCase.ActualizarStockResponse response =
-                actualizarStockUseCase.decrementarStock(id, cantidad);
-        return ResponseEntity.ok(response);
+            @RequestParam int cantidad
+    ) {
+        return ResponseEntity.ok(
+                actualizarStockUseCase.decrementarStock(id, cantidad)
+        );
     }
 
-    /**
-     * Ajustar stock a un valor específico
-     * POST /api/productos/{id}/stock/ajustar
-     */
-    @PostMapping("/{id}/stock/ajustar")
-    public ResponseEntity<ActualizarStockUseCase.ActualizarStockResponse> ajustarStock(
+    // 9️⃣ Ajustar stock
+    @PutMapping("/{id}/stock")
+    public ResponseEntity<ActualizarStockResponse> ajustarStock(
             @PathVariable String id,
-            @RequestParam int nuevoStock) {
-
-        ActualizarStockUseCase.ActualizarStockResponse response =
-                actualizarStockUseCase.ajustarStock(id, nuevoStock);
-        return ResponseEntity.ok(response);
+            @RequestParam int nuevoStock
+    ) {
+        return ResponseEntity.ok(
+                actualizarStockUseCase.ajustarStock(id, nuevoStock)
+        );
     }
 }

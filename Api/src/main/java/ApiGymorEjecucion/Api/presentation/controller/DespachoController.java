@@ -1,5 +1,11 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
+import ApiGymorEjecucion.Api.application.dto.request.despacho.ActualizarEstadoRequest;
+import ApiGymorEjecucion.Api.application.dto.response.despacho.DespachoResponse;
+import ApiGymorEjecucion.Api.application.dto.response.despacho.TrackingResponse;
+import ApiGymorEjecucion.Api.application.usecase.despacho.ActualizarEstadoDespachoUseCase;
+import ApiGymorEjecucion.Api.application.usecase.despacho.ConsultarDespachoUseCase;
+import ApiGymorEjecucion.Api.application.usecase.despacho.ObtenerTrackingUseCase;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,82 +19,73 @@ import java.util.List;
 @RequestMapping("/api/despachos")
 public class DespachoController {
 
-    /**
-     * Consultar despacho de un pedido
-     * GET /api/despachos/pedido/{pedidoId}
-     */
+    private final ConsultarDespachoUseCase consultarDespachoUseCase;
+    private final ActualizarEstadoDespachoUseCase actualizarEstadoDespachoUseCase;
+    private final ObtenerTrackingUseCase obtenerTrackingUseCase;
+
+    public DespachoController(
+            ConsultarDespachoUseCase consultarDespachoUseCase,
+            ActualizarEstadoDespachoUseCase actualizarEstadoDespachoUseCase,
+            ObtenerTrackingUseCase obtenerTrackingUseCase
+    ) {
+        this.consultarDespachoUseCase = consultarDespachoUseCase;
+        this.actualizarEstadoDespachoUseCase = actualizarEstadoDespachoUseCase;
+        this.obtenerTrackingUseCase = obtenerTrackingUseCase;
+    }
+
+    // 1️⃣ Consultar despacho por ID
+    @GetMapping("/{despachoId}")
+    public ResponseEntity<DespachoResponse> consultarPorId(
+            @PathVariable String despachoId
+    ) {
+        DespachoResponse response =
+                consultarDespachoUseCase.buscarPorId(despachoId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 2️⃣ Consultar despacho por pedido
     @GetMapping("/pedido/{pedidoId}")
-    public ResponseEntity<DespachoResponse> buscarPorPedido(
-            @PathVariable String pedidoId) {
+    public ResponseEntity<DespachoResponse> consultarPorPedido(
+            @PathVariable String pedidoId
+    ) {
+        DespachoResponse response =
+                consultarDespachoUseCase.buscarPorPedido(pedidoId);
 
-        // TODO: Implementar ConsultarDespachoPorPedidoUseCase
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Consultar despacho por guía
-     * GET /api/despachos/guia/{numeroGuia}
-     */
+    // 3️⃣ Consultar despacho por número de guía
     @GetMapping("/guia/{numeroGuia}")
-    public ResponseEntity<DespachoResponse> buscarPorGuia(
-            @PathVariable String numeroGuia) {
+    public ResponseEntity<DespachoResponse> consultarPorGuia(
+            @PathVariable String numeroGuia
+    ) {
+        DespachoResponse response =
+                consultarDespachoUseCase.buscarPorGuia(numeroGuia);
 
-        // TODO: Implementar ConsultarDespachoPorGuiaUseCase
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Listar despachos pendientes
-     * GET /api/despachos/pendientes
-     */
-    @GetMapping("/pendientes")
-    public ResponseEntity<List<DespachoResponse>> listarPendientes() {
-        // TODO: Implementar ListarDespachosPendientesUseCase
-        return ResponseEntity.ok().build();
-    }
-
-    /**
-     * Listar despachos en tránsito
-     * GET /api/despachos/en-transito
-     */
-    @GetMapping("/en-transito")
-    public ResponseEntity<List<DespachoResponse>> listarEnTransito() {
-        // TODO: Implementar ListarDespachosEnTransitoUseCase
-        return ResponseEntity.ok().build();
-    }
-
-    /**
-     * Actualizar estado de despacho (integración con transportista)
-     * POST /api/despachos/{id}/actualizar-estado
-     */
-    @PostMapping("/{id}/actualizar-estado")
+    // 4️⃣ Actualizar estado del despacho
+    @PatchMapping("/{despachoId}")
     public ResponseEntity<DespachoResponse> actualizarEstado(
-            @PathVariable String id,
-            @RequestBody ActualizarEstadoRequest request) {
+            @PathVariable String despachoId,
+            @RequestBody ActualizarEstadoRequest request
+    ) {
+        DespachoResponse response =
+                actualizarEstadoDespachoUseCase.ejecutar(despachoId, request);
 
-        // TODO: Implementar ActualizarEstadoDespachoUseCase
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(response);
     }
 
-    // DTOs
-    public static class DespachoResponse {
-        private String id;
-        private String pedidoId;
-        private String numeroGuia;
-        private String urlTracking;
-        private String transportista;
-        private String direccionCompleta;
-        private LocalDateTime fechaDespacho;
-        private LocalDateTime fechaEntregaEstimada;
-        private LocalDateTime fechaEntregaReal;
-        private String estado;
-        // getters/setters
-    }
+    // 5️⃣ Obtener tracking del despacho (por pedido)
+    @GetMapping("/pedido/{pedidoId}/tracking")
+    public ResponseEntity<TrackingResponse> obtenerTracking(
+            @PathVariable String pedidoId
+    ) {
+        TrackingResponse response =
+                obtenerTrackingUseCase.ejecutar(pedidoId);
 
-    public static class ActualizarEstadoRequest {
-        private String estado;
-        private String observaciones;
-        private LocalDateTime fechaActualizacion;
-        // getters/setters
+        return ResponseEntity.ok(response);
     }
 }

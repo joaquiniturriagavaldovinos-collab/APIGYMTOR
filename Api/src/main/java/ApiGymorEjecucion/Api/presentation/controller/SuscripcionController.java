@@ -1,5 +1,11 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
+import ApiGymorEjecucion.Api.application.dto.request.suscripcion.ContratarSuscripcionRequest;
+import ApiGymorEjecucion.Api.application.dto.response.suscripcion.SuscripcionResponse;
+import ApiGymorEjecucion.Api.application.usecase.suscripcion.CancelarSuscripcionUseCase;
+import ApiGymorEjecucion.Api.application.usecase.suscripcion.ConsumirSesionUseCase;
+import ApiGymorEjecucion.Api.application.usecase.suscripcion.ContratarSuscripcionUseCase;
+import ApiGymorEjecucion.Api.application.usecase.suscripcion.RenovarSuscripcionUseCase;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,106 +20,69 @@ import java.util.List;
 @RequestMapping("/api/suscripciones")
 public class SuscripcionController {
 
-    /**
-     * Contratar un plan (crear suscripción)
-     * POST /api/suscripciones
-     */
+    private final ContratarSuscripcionUseCase contratarSuscripcionUseCase;
+    private final CancelarSuscripcionUseCase cancelarSuscripcionUseCase;
+    private final ConsumirSesionUseCase consumirSesionUseCase;
+    private final RenovarSuscripcionUseCase renovarSuscripcionUseCase;
+
+    public SuscripcionController(
+            ContratarSuscripcionUseCase contratarSuscripcionUseCase,
+            CancelarSuscripcionUseCase cancelarSuscripcionUseCase,
+            ConsumirSesionUseCase consumirSesionUseCase,
+            RenovarSuscripcionUseCase renovarSuscripcionUseCase
+    ) {
+        this.contratarSuscripcionUseCase = contratarSuscripcionUseCase;
+        this.cancelarSuscripcionUseCase = cancelarSuscripcionUseCase;
+        this.consumirSesionUseCase = consumirSesionUseCase;
+        this.renovarSuscripcionUseCase = renovarSuscripcionUseCase;
+    }
+
+    // =========================
+    // 📌 CONTRATAR SUSCRIPCIÓN
+    // =========================
     @PostMapping
-    public ResponseEntity<SuscripcionResponse> contratarPlan(
-            @RequestBody ContratarPlanRequest request) {
+    public ResponseEntity<SuscripcionResponse> contratar(
+            @RequestBody ContratarSuscripcionRequest request
+    ) {
+        SuscripcionResponse response =
+                contratarSuscripcionUseCase.ejecutar(request);
 
-        // TODO: Implementar ContratarPlanUseCase
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Consultar suscripciones de un cliente
-     * GET /api/suscripciones/cliente/{clienteId}
-     */
-    @GetMapping("/cliente/{clienteId}")
-    public ResponseEntity<List<SuscripcionResponse>> buscarPorCliente(
-            @PathVariable String clienteId) {
-
-        // TODO: Implementar ConsultarSuscripcionesPorClienteUseCase
-        return ResponseEntity.ok().build();
+    // =========================
+    // 📌 CANCELAR SUSCRIPCIÓN
+    // =========================
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancelar(
+            @PathVariable String id
+    ) {
+        cancelarSuscripcionUseCase.ejecutar(id);
+        return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Consultar suscripción por ID
-     * GET /api/suscripciones/{id}
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<SuscripcionResponse> buscarPorId(@PathVariable String id) {
-        // TODO: Implementar ConsultarSuscripcionUseCase
-        return ResponseEntity.ok().build();
-    }
-
-    /**
-     * Consumir una sesión
-     * POST /api/suscripciones/{id}/consumir-sesion
-     */
+    // =========================
+    // 📌 CONSUMIR SESIÓN
+    // =========================
     @PostMapping("/{id}/consumir-sesion")
-    public ResponseEntity<SuscripcionResponse> consumirSesion(@PathVariable String id) {
-        // TODO: Implementar ConsumirSesionUseCase
-        return ResponseEntity.ok().build();
+    public ResponseEntity<SuscripcionResponse> consumirSesion(
+            @PathVariable String id
+    ) {
+        return ResponseEntity.ok(
+                consumirSesionUseCase.ejecutar(id)
+        );
     }
 
-    /**
-     * Renovar suscripción
-     * POST /api/suscripciones/{id}/renovar
-     */
+    // =========================
+    // 📌 RENOVAR SUSCRIPCIÓN
+    // =========================
     @PostMapping("/{id}/renovar")
-    public ResponseEntity<SuscripcionResponse> renovarSuscripcion(
+    public ResponseEntity<SuscripcionResponse> renovar(
             @PathVariable String id,
-            @RequestParam int duracionMeses) {
-
-        // TODO: Implementar RenovarSuscripcionUseCase
-        return ResponseEntity.ok().build();
-    }
-
-    /**
-     * Cancelar suscripción
-     * POST /api/suscripciones/{id}/cancelar
-     */
-    @PostMapping("/{id}/cancelar")
-    public ResponseEntity<SuscripcionResponse> cancelarSuscripcion(@PathVariable String id) {
-        // TODO: Implementar CancelarSuscripcionUseCase
-        return ResponseEntity.ok().build();
-    }
-
-    /**
-     * Habilitar autorenovación
-     * POST /api/suscripciones/{id}/autorenovar
-     */
-    @PostMapping("/{id}/autorenovar")
-    public ResponseEntity<SuscripcionResponse> habilitarAutorenovacion(
-            @PathVariable String id,
-            @RequestParam boolean habilitar) {
-
-        // TODO: Implementar ConfigurarAutorenovacionUseCase
-        return ResponseEntity.ok().build();
-    }
-
-    // DTOs
-    public static class ContratarPlanRequest {
-        private String clienteId;
-        private String planId;
-        // getters/setters
-    }
-
-    public static class SuscripcionResponse {
-        private String id;
-        private String clienteId;
-        private String planId;
-        private LocalDateTime fechaInicio;
-        private LocalDateTime fechaVencimiento;
-        private int sesionesRestantes;
-        private boolean activa;
-        private boolean autorrenovable;
-        private boolean estaVigente;
-        private long diasRestantes;
-        // getters/setters
+            @RequestParam int duracionMeses
+    ) {
+        return ResponseEntity.ok(
+                renovarSuscripcionUseCase.ejecutar(id, duracionMeses)
+        );
     }
 }

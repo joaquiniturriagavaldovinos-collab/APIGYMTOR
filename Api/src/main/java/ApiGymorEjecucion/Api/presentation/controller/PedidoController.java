@@ -1,6 +1,7 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
 
+import ApiGymorEjecucion.Api.application.dto.request.pago.ConfirmarPagoRequest;
 import ApiGymorEjecucion.Api.application.dto.request.pedido.CrearPedidoRequest;
 import ApiGymorEjecucion.Api.application.dto.request.pedido.DespacharPedidoRequest;
 import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
@@ -21,140 +22,103 @@ public class PedidoController {
 
     private final CrearPedidoUseCase crearPedidoUseCase;
     private final IniciarPagoPedidoUseCase iniciarPagoPedidoUseCase;
+    private final ConfirmarResultadoPagoUseCase confirmarResultadoPagoUseCase;
     private final PrepararPedidoUseCase prepararPedidoUseCase;
     private final DespacharPedidoUseCase despacharPedidoUseCase;
     private final ConfirmarEntregaUseCase confirmarEntregaUseCase;
-    private final ConsultarEstadoPedidoUseCase consultarEstadoPedidoUseCase;
     private final CancelarPedidoUseCase cancelarPedidoUseCase;
+    private final ConsultarEstadoPedidoUseCase consultarEstadoPedidoUseCase;
 
     public PedidoController(
             CrearPedidoUseCase crearPedidoUseCase,
             IniciarPagoPedidoUseCase iniciarPagoPedidoUseCase,
+            ConfirmarResultadoPagoUseCase confirmarResultadoPagoUseCase,
             PrepararPedidoUseCase prepararPedidoUseCase,
             DespacharPedidoUseCase despacharPedidoUseCase,
             ConfirmarEntregaUseCase confirmarEntregaUseCase,
-            ConsultarEstadoPedidoUseCase consultarEstadoPedidoUseCase,
-            CancelarPedidoUseCase cancelarPedidoUseCase) {
+            CancelarPedidoUseCase cancelarPedidoUseCase,
+            ConsultarEstadoPedidoUseCase consultarEstadoPedidoUseCase
+    ) {
         this.crearPedidoUseCase = crearPedidoUseCase;
         this.iniciarPagoPedidoUseCase = iniciarPagoPedidoUseCase;
+        this.confirmarResultadoPagoUseCase = confirmarResultadoPagoUseCase;
         this.prepararPedidoUseCase = prepararPedidoUseCase;
         this.despacharPedidoUseCase = despacharPedidoUseCase;
         this.confirmarEntregaUseCase = confirmarEntregaUseCase;
-        this.consultarEstadoPedidoUseCase = consultarEstadoPedidoUseCase;
         this.cancelarPedidoUseCase = cancelarPedidoUseCase;
+        this.consultarEstadoPedidoUseCase = consultarEstadoPedidoUseCase;
     }
 
-    /**
-     * CU1: Crear Pedido
-     * POST /api/pedidos
-     *
-     * @param request Datos del pedido a crear
-     * @return Pedido creado con estado CREATED
-     */
+    // 1️⃣ Crear pedido
     @PostMapping
     public ResponseEntity<PedidoResponse> crearPedido(
-            @RequestBody CrearPedidoRequest request) {
-
+            @RequestBody CrearPedidoRequest request
+    ) {
         PedidoResponse response = crearPedidoUseCase.ejecutar(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * CU2: Iniciar Pago de Pedido
-     * POST /api/pedidos/{id}/iniciar-pago
-     *
-     * @param id ID del pedido
-     * @return Pedido en estado PAYMENT_PENDING
-     */
-    @PostMapping("/{id}/iniciar-pago")
+    // 2️⃣ Consultar estado del pedido
+    @GetMapping("/{pedidoId}")
+    public ResponseEntity<PedidoResponse> consultarPedido(
+            @PathVariable String pedidoId
+    ) {
+        PedidoResponse response = consultarEstadoPedidoUseCase.ejecutar(pedidoId);
+        return ResponseEntity.ok(response);
+    }
+
+    // 3️⃣ Iniciar pago
+    @PostMapping("/{pedidoId}/pago")
     public ResponseEntity<PedidoResponse> iniciarPago(
-            @PathVariable String id) {
-
-        PedidoResponse response = iniciarPagoPedidoUseCase.ejecutar(id);
+            @PathVariable String pedidoId
+    ) {
+        PedidoResponse response = iniciarPagoPedidoUseCase.ejecutar(pedidoId);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * CU4: Preparar Pedido
-     * POST /api/pedidos/{id}/preparar
-     *
-     * @param id ID del pedido
-     * @return Pedido en estado PREPARING
-     */
-    @PostMapping("/{id}/preparar")
+    // 4️⃣ Confirmar resultado de pago (callback pasarela)
+    @PostMapping("/pago/confirmacion")
+    public ResponseEntity<PedidoResponse> confirmarPago(
+            @RequestBody ConfirmarPagoRequest request
+    ) {
+        PedidoResponse response = confirmarResultadoPagoUseCase.ejecutar(request);
+        return ResponseEntity.ok(response);
+    }
+
+    // 5️⃣ Preparar pedido
+    @PostMapping("/{pedidoId}/preparacion")
     public ResponseEntity<PedidoResponse> prepararPedido(
-            @PathVariable String id) {
-
-        PedidoResponse response = prepararPedidoUseCase.ejecutar(id);
+            @PathVariable String pedidoId
+    ) {
+        PedidoResponse response = prepararPedidoUseCase.ejecutar(pedidoId);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * CU5: Despachar Pedido
-     * POST /api/pedidos/{id}/despachar
-     *
-     * @param id ID del pedido
-     * @param request Datos de despacho (guía, transportista)
-     * @return Pedido en estado DISPATCHED
-     */
-    @PostMapping("/{id}/despachar")
+    // 6️⃣ Despachar pedido
+    @PostMapping("/despacho")
     public ResponseEntity<PedidoResponse> despacharPedido(
-            @PathVariable String id,
-            @RequestBody DespacharPedidoRequest request) {
-
-        // Asegurar que el ID coincida
-        request.setPedidoId(id);
-
+            @RequestBody DespacharPedidoRequest request
+    ) {
         PedidoResponse response = despacharPedidoUseCase.ejecutar(request);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * CU6: Confirmar Entrega
-     * POST /api/pedidos/{id}/confirmar-entrega
-     *
-     * @param id ID del pedido
-     * @return Pedido en estado DELIVERED (final)
-     */
-    @PostMapping("/{id}/confirmar-entrega")
+    // 7️⃣ Confirmar entrega
+    @PostMapping("/{pedidoId}/entrega")
     public ResponseEntity<PedidoResponse> confirmarEntrega(
-            @PathVariable String id) {
-
-        PedidoResponse response = confirmarEntregaUseCase.ejecutar(id);
+            @PathVariable String pedidoId
+    ) {
+        PedidoResponse response = confirmarEntregaUseCase.ejecutar(pedidoId);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Consultar Estado de Pedido
-     * GET /api/pedidos/{id}
-     *
-     * @param id ID del pedido
-     * @return Información completa del pedido
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<PedidoResponse> consultarPedido(
-            @PathVariable String id) {
-
-        PedidoResponse response = consultarEstadoPedidoUseCase.ejecutar(id);
-        return ResponseEntity.ok(response);
-    }
-
-    /**
-     * Cancelar Pedido
-     * POST /api/pedidos/{id}/cancelar
-     *
-     * @param id ID del pedido
-     * @param motivo Razón de la cancelación (query param)
-     * @return Pedido en estado CANCELLED (final)
-     */
-    @PostMapping("/{id}/cancelar")
+    // 8️⃣ Cancelar pedido
+    @PostMapping("/{pedidoId}/cancelacion")
     public ResponseEntity<PedidoResponse> cancelarPedido(
-            @PathVariable String id,
-            @RequestParam String motivo) {
-
-        PedidoResponse response = cancelarPedidoUseCase.ejecutar(id, motivo);
+            @PathVariable String pedidoId,
+            @RequestParam String motivo
+    ) {
+        PedidoResponse response = cancelarPedidoUseCase.ejecutar(pedidoId, motivo);
         return ResponseEntity.ok(response);
     }
 }
