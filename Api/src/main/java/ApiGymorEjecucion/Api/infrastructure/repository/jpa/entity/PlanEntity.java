@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "planes")
-public class PlanJpaEntity {
+public class PlanEntity {
 
     @Id
     private String id;

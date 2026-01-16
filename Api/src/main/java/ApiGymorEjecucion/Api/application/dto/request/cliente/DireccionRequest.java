@@ -1,15 +1,37 @@
 package ApiGymorEjecucion.Api.application.dto.request.cliente;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 public class DireccionRequest {
-    private String calle;
-    private String numero;
-    private String comuna;
-    private String ciudad;
-    private String region;
-    private String codigoPostal;
-    private String referencia;
-    private boolean esPrincipal;
 
+
+    @NotBlank(message = "La calle es requerida")
+    @Size(max = 255)
+    private String calle;
+
+    @NotBlank(message = "El número es requerido")
+    @Size(max = 10)
+    private String numero;
+
+    @NotBlank(message = "La comuna es requerida")
+    @Size(max = 100)
+    private String comuna;
+
+    @NotBlank(message = "La ciudad es requerida")
+    @Size(max = 100)
+    private String ciudad;
+
+    @NotBlank(message = "La región es requerida")
+    @Size(max = 100)
+    private String region;
+
+    @Size(max = 10)
+    private String codigoPostal;
+
+    @Size(max = 500)
+    private String referencia;
+
+    private boolean esPrincipal;
     // Getters y Setters
     public String getCalle() { return calle; }
     public void setCalle(String calle) { this.calle = calle; }

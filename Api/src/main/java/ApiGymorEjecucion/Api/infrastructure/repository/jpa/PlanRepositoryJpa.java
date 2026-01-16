@@ -2,25 +2,25 @@ package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 
 import ApiGymorEjecucion.Api.domain.model.servicio.Plan;
 import ApiGymorEjecucion.Api.domain.repository.PlanRepository;
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.PlanJpaEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.PlanEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class PlanRepositoryImpl implements PlanRepository {
+public class PlanRepositoryJpa implements PlanRepository {
 
     private final PlanJpaRepository jpaRepository;
 
-    public PlanRepositoryImpl(PlanJpaRepository jpaRepository) {
+    public PlanRepositoryJpa(PlanJpaRepository jpaRepository) {
         this.jpaRepository = jpaRepository;
     }
 
     @Override
     public Plan guardar(Plan plan) {
-        PlanJpaEntity entity = mapToJpa(plan);
-        PlanJpaEntity saved = jpaRepository.save(entity);
+        PlanEntity entity = mapToJpa(plan);
+        PlanEntity saved = jpaRepository.save(entity);
         return mapToDomain(saved);
     }
 
@@ -40,8 +40,8 @@ public class PlanRepositoryImpl implements PlanRepository {
 
     /* ===================== MAPPERS ===================== */
 
-    private PlanJpaEntity mapToJpa(Plan plan) {
-        PlanJpaEntity entity = new PlanJpaEntity();
+    private PlanEntity mapToJpa(Plan plan) {
+        PlanEntity entity = new PlanEntity();
         entity.setId(plan.getId());
         entity.setNombre(plan.getNombre());
         entity.setDescripcion(plan.getDescripcion());
@@ -52,7 +52,7 @@ public class PlanRepositoryImpl implements PlanRepository {
         return entity;
     }
 
-    private Plan mapToDomain(PlanJpaEntity entity) {
+    private Plan mapToDomain(PlanEntity entity) {
         return Plan.reconstruir(
                 entity.getId(),
                 entity.getNombre(),

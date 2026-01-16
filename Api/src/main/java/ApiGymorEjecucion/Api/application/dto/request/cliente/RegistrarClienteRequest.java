@@ -1,15 +1,37 @@
 package ApiGymorEjecucion.Api.application.dto.request.cliente;
 
 import ApiGymorEjecucion.Api.application.usecase.cliente.RegistrarClienteUseCase;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public class RegistrarClienteRequest {
+    @NotBlank(message = "El nombre es requerido")
+    @Size(min = 2, max = 100, message = "El nombre debe tener entre 2 y 100 caracteres")
     private String nombre;
+
+    @NotBlank(message = "El apellido es requerido")
+    @Size(min = 2, max = 100, message = "El apellido debe tener entre 2 y 100 caracteres")
     private String apellido;
-    private String nombreCompleto;
+
+    @NotBlank(message = "El email es requerido")
+    @Email(message = "El email no tiene un formato válido")
     private String email;
+
+    @Pattern(regexp = "^\\+?[0-9]{8,15}$", message = "El teléfono no tiene un formato válido")
     private String telefono;
+
+    @NotBlank(message = "El RUT es requerido")
+    @Pattern(regexp = "^[0-9]{7,8}-[0-9Kk]$", message = "El RUT debe tener formato 12345678-9")
     private String rut;
-    private String tipo; // "MINORISTA" o "MAYORISTA"
+
+    @NotBlank(message = "El tipo es requerido")
+    @Pattern(regexp = "MINORISTA|MAYORISTA", message = "El tipo debe ser MINORISTA o MAYORISTA")
+    private String tipo;
+
+    @Valid  // Valida el objeto anidado
     private DireccionRequest direccion;
 
     // Getters y Setters
@@ -29,14 +51,6 @@ public class RegistrarClienteRequest {
         this.apellido = apellido;
     }
 
-
-    public String getNombreCompleto() {
-        return nombreCompleto;
-    }
-
-    public void setNombreCompleto(String nombreCompleto) {
-        this.nombreCompleto = nombreCompleto;
-    }
 
 
     public String getEmail() {

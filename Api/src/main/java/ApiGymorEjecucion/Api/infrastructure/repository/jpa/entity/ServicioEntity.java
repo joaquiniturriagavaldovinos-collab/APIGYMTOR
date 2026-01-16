@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "servicios")
-public class ServicioJpaEntity {
+public class ServicioEntity {
 
     @Id
     private String id;

@@ -3,25 +3,25 @@ package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 import ApiGymorEjecucion.Api.domain.model.servicio.ModalidadClase;
 import ApiGymorEjecucion.Api.domain.model.servicio.Servicio;
 import ApiGymorEjecucion.Api.domain.repository.ServicioRepository;
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.ServicioJpaEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.ServicioEntity;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class ServicioRepositoryImpl implements ServicioRepository {
+public class ServicioRepositoryJpa implements ServicioRepository {
 
     private final ServicioJpaRepository jpaRepository;
 
-    public ServicioRepositoryImpl(ServicioJpaRepository jpaRepository) {
+    public ServicioRepositoryJpa(ServicioJpaRepository jpaRepository) {
         this.jpaRepository = jpaRepository;
     }
 
     @Override
     public Servicio guardar(Servicio servicio) {
-        ServicioJpaEntity entity = mapToJpa(servicio);
-        ServicioJpaEntity saved = jpaRepository.save(entity);
+        ServicioEntity entity = mapToJpa(servicio);
+        ServicioEntity saved = jpaRepository.save(entity);
         return mapToDomain(saved);
     }
 
@@ -49,8 +49,8 @@ public class ServicioRepositoryImpl implements ServicioRepository {
 
     /* ===================== MAPPERS ===================== */
 
-    private ServicioJpaEntity mapToJpa(Servicio servicio) {
-        ServicioJpaEntity entity = new ServicioJpaEntity();
+    private ServicioEntity mapToJpa(Servicio servicio) {
+        ServicioEntity entity = new ServicioEntity();
         entity.setId(servicio.getId());
         entity.setNombre(servicio.getNombre());
         entity.setDescripcion(servicio.getDescripcion());
@@ -63,7 +63,7 @@ public class ServicioRepositoryImpl implements ServicioRepository {
         return entity;
     }
 
-    private Servicio mapToDomain(ServicioJpaEntity entity) {
+    private Servicio mapToDomain(ServicioEntity entity) {
         return Servicio.reconstruir(
                 entity.getId(),
                 entity.getNombre(),
