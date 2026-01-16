@@ -23,6 +23,13 @@
     </properties>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- H2 Database (solo para desarrollo/local) -->
         <dependency>
             <groupId>com.h2database</groupId>

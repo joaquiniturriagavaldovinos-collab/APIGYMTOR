@@ -17,7 +17,7 @@ public class Plan {
     private int duracionMeses;
     private int sesionesIncluidas; // 0 = ilimitadas
     private boolean activo;
-    private final LocalDateTime fechaCreacion;
+    private LocalDateTime fechaCreacion;
 
     private Plan(String id, String nombre, String descripcion, BigDecimal precio,
                  int duracionMeses, int sesionesIncluidas) {
@@ -30,6 +30,48 @@ public class Plan {
         this.activo = true;
         this.fechaCreacion = LocalDateTime.now();
     }
+
+    public static Plan reconstruir(
+            String id,
+            String nombre,
+            String descripcion,
+            BigDecimal precio,
+            int duracionMeses,
+            int sesionesIncluidas,
+            boolean activo,
+            LocalDateTime fechaCreacion
+    ) {
+        return new Plan(
+                id,
+                nombre,
+                descripcion,
+                precio,
+                duracionMeses,
+                sesionesIncluidas,
+                activo,
+                fechaCreacion
+        );
+    }
+    private Plan(
+            String id,
+            String nombre,
+            String descripcion,
+            BigDecimal precio,
+            int duracionMeses,
+            int sesionesIncluidas,
+            boolean activo,
+            LocalDateTime fechaCreacion
+    ) {
+        this.id = id;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.duracionMeses = duracionMeses;
+        this.sesionesIncluidas = sesionesIncluidas;
+        this.activo = activo;
+        this.fechaCreacion = fechaCreacion;
+    }
+
 
     public static Plan crear(String id, String nombre, String descripcion,
                              BigDecimal precio, int duracionMeses, int sesionesIncluidas) {

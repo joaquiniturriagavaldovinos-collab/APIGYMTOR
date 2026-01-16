@@ -223,4 +223,45 @@ public class Suscripcion {
         return String.format("Suscripcion{id='%s', clienteId='%s', activa=%s, vence=%s}",
                 id, clienteId, activa, fechaVencimiento);
     }
+
+    private Suscripcion(String id,
+                        String clienteId,
+                        String planId,
+                        LocalDateTime fechaInicio,
+                        LocalDateTime fechaVencimiento,
+                        int sesionesRestantes,
+                        LocalDateTime fechaContratacion) {
+
+        this.id = id;
+        this.clienteId = clienteId;
+        this.planId = planId;
+        this.fechaInicio = fechaInicio;
+        this.fechaVencimiento = fechaVencimiento;
+        this.sesionesRestantes = sesionesRestantes;
+        this.activa = true;
+        this.autorrenovable = false;
+        this.fechaContratacion = fechaContratacion;
+    }
+
+
+    public static Suscripcion crearDesdePersistencia(
+            String id,
+            String clienteId,
+            String planId,
+            LocalDateTime fechaInicio,
+            LocalDateTime fechaVencimiento,
+            int sesionesRestantes,
+            LocalDateTime fechaContratacion
+    ) {
+        return new Suscripcion(
+                id,
+                clienteId,
+                planId,
+                fechaInicio,
+                fechaVencimiento,
+                sesionesRestantes,
+                fechaContratacion
+        );
+    }
+
 }

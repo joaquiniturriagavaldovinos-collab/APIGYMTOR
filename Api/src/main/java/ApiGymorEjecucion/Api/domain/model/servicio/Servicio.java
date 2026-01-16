@@ -18,7 +18,7 @@ public class Servicio {
     private int duracionMinutos;
     private int capacidadMaxima;
     private boolean activo;
-    private final LocalDateTime fechaCreacion;
+    private LocalDateTime fechaCreacion;
 
     private Servicio(String id, String nombre, String descripcion, ModalidadClase modalidad,
                      BigDecimal precioSesion, int duracionMinutos, int capacidadMaxima) {
@@ -63,6 +63,34 @@ public class Servicio {
             throw new IllegalArgumentException("La capacidad máxima debe ser mayor a cero");
         }
     }
+
+    public static Servicio reconstruir(
+            String id,
+            String nombre,
+            String descripcion,
+            ModalidadClase modalidad,
+            BigDecimal precioSesion,
+            int duracionMinutos,
+            int capacidadMaxima,
+            boolean activo,
+            LocalDateTime fechaCreacion
+    ) {
+        Servicio servicio = new Servicio(
+                id,
+                nombre,
+                descripcion,
+                modalidad,
+                precioSesion,
+                duracionMinutos,
+                capacidadMaxima
+        );
+
+        servicio.activo = activo;
+        servicio.fechaCreacion = fechaCreacion;
+
+        return servicio;
+    }
+
 
     // Métodos de negocio
     public void actualizarPrecio(BigDecimal nuevoPrecio) {
