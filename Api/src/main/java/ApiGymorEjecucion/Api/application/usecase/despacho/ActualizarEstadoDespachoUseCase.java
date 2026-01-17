@@ -43,15 +43,15 @@ public class ActualizarEstadoDespachoUseCase {
                 break;
 
             case "FECHA_ESTIMADA":
-                if (request.getFechaEntregaEstimada() != null) {
-                    despacho.establecerFechaEntregaEstimada(request.getFechaEntregaEstimada());
-                }
+                despacho.establecerFechaEntregaEstimada(
+                        request.getFechaEntregaEstimada()
+                );
                 break;
 
             case "OBSERVACIONES":
-                if (request.getObservaciones() != null) {
-                    despacho.setObservaciones(request.getObservaciones());
-                }
+                despacho.actualizarObservaciones(
+                        request.getObservaciones()
+                );
                 break;
 
             default:
@@ -59,6 +59,7 @@ public class ActualizarEstadoDespachoUseCase {
                         "Tipo de actualización no soportado: " + request.getTipoActualizacion()
                 );
         }
+
 
         // Persistir
         Despacho actualizado = despachoRepository.guardar(despacho);

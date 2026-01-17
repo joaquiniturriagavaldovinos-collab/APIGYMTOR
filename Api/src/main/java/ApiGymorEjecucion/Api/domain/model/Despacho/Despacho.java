@@ -1,137 +1,131 @@
 package ApiGymorEjecucion.Api.domain.model.Despacho;
 
-
 import ApiGymorEjecucion.Api.domain.model.Cliente.DireccionEntrega;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
-/**
- * Entidad: Despacho
- * Representa el envío físico de un pedido
- */
 public class Despacho {
+
     private final String id;
     private final String pedidoId;
+
     private GuiaDespacho guiaDespacho;
     private Transportista transportista;
     private DireccionEntrega direccionEntrega;
+
     private LocalDateTime fechaDespacho;
     private LocalDateTime fechaEntregaEstimada;
     private LocalDateTime fechaEntregaReal;
-    private String observaciones;
 
-    private Despacho(String id, String pedidoId, DireccionEntrega direccionEntrega) {
+    private String observaciones;
+    private EstadoDespacho estado;
+
+    private Despacho(
+            String id,
+            String pedidoId,
+            EstadoDespacho estado
+    ) {
         this.id = id;
         this.pedidoId = pedidoId;
-        this.direccionEntrega = direccionEntrega;
+        this.estado = estado;
     }
 
-    public static Despacho crear(String id, String pedidoId, DireccionEntrega direccionEntrega) {
-        if (id == null || id.isBlank()) {
-            throw new IllegalArgumentException("El ID del despacho es requerido");
-        }
-        if (pedidoId == null || pedidoId.isBlank()) {
-            throw new IllegalArgumentException("El ID del pedido es requerido");
-        }
-        if (direccionEntrega == null) {
-            throw new IllegalArgumentException("La dirección de entrega es requerida");
-        }
-        return new Despacho(id, pedidoId, direccionEntrega);
+    /* ===================== FACTORY ===================== */
+
+    public static Despacho crear(String id, String pedidoId) {
+        return new Despacho(id, pedidoId, EstadoDespacho.PENDIENTE);
     }
 
-    // Métodos de negocio
-    public void asignarTransportista(Transportista transportista, GuiaDespacho guiaDespacho) {
-        if (transportista == null) {
-            throw new IllegalArgumentException("El transportista no puede ser nulo");
+    public static Despacho reconstruir(
+            String id,
+            String pedidoId,
+            GuiaDespacho guiaDespacho,
+            Transportista transportista,
+            DireccionEntrega direccionEntrega,
+            LocalDateTime fechaDespacho,
+            LocalDateTime fechaEntregaEstimada,
+            LocalDateTime fechaEntregaReal,
+            String observaciones,
+            EstadoDespacho estado
+    ) {
+        Despacho despacho = new Despacho(id, pedidoId, estado);
+        despacho.guiaDespacho = guiaDespacho;
+        despacho.transportista = transportista;
+        despacho.direccionEntrega = direccionEntrega;
+        despacho.fechaDespacho = fechaDespacho;
+        despacho.fechaEntregaEstimada = fechaEntregaEstimada;
+        despacho.fechaEntregaReal = fechaEntregaReal;
+        despacho.observaciones = observaciones;
+        return despacho;
+    }
+
+    /* ===================== COMPORTAMIENTO ===================== */
+
+    public void despachar(
+            GuiaDespacho guiaDespacho,
+            Transportista transportista
+    ) {
+        if (estado != EstadoDespacho.PENDIENTE) {
+            throw new IllegalStateException("El despacho no está pendiente");
         }
-        if (guiaDespacho == null) {
-            throw new IllegalArgumentException("La guía de despacho no puede ser nula");
-        }
-        this.transportista = transportista;
+
         this.guiaDespacho = guiaDespacho;
+        this.transportista = transportista;
         this.fechaDespacho = LocalDateTime.now();
-    }
-
-    public void establecerFechaEntregaEstimada(LocalDateTime fechaEntregaEstimada) {
-        if (fechaEntregaEstimada == null) {
-            throw new IllegalArgumentException("La fecha de entrega estimada no puede ser nula");
-        }
-        if (fechaEntregaEstimada.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("La fecha de entrega estimada no puede ser en el pasado");
-        }
-        this.fechaEntregaEstimada = fechaEntregaEstimada;
+        this.estado = EstadoDespacho.EN_TRANSITO;
     }
 
     public void confirmarEntrega() {
+        if (estado != EstadoDespacho.EN_TRANSITO) {
+            throw new IllegalStateException(
+                    "No se puede entregar un despacho que no está en tránsito"
+            );
+        }
         this.fechaEntregaReal = LocalDateTime.now();
+        this.estado = EstadoDespacho.ENTREGADO;
     }
 
-    public boolean estaEntregado() {
-        return fechaEntregaReal != null;
+    public void establecerFechaEntregaEstimada(LocalDateTime fecha) {
+        this.fechaEntregaEstimada = fecha;
+    }
+
+    /* ===================== ESTADOS ===================== */
+
+    public boolean estaPendiente() {
+        return estado == EstadoDespacho.PENDIENTE;
     }
 
     public boolean estaDespachado() {
-        return fechaDespacho != null && guiaDespacho != null;
+        return estado == EstadoDespacho.EN_TRANSITO
+                || estado == EstadoDespacho.ENTREGADO;
     }
 
-    // Getters
-    public String getId() {
-        return id;
+    public boolean estaEnTransito() {
+        return estado == EstadoDespacho.EN_TRANSITO;
     }
 
-    public String getPedidoId() {
-        return pedidoId;
+    public boolean estaEntregado() {
+        return estado == EstadoDespacho.ENTREGADO;
     }
 
-    public GuiaDespacho getGuiaDespacho() {
-        return guiaDespacho;
-    }
-
-    public Transportista getTransportista() {
-        return transportista;
-    }
-
-    public DireccionEntrega getDireccionEntrega() {
-        return direccionEntrega;
-    }
-
-    public LocalDateTime getFechaDespacho() {
-        return fechaDespacho;
-    }
-
-    public LocalDateTime getFechaEntregaEstimada() {
-        return fechaEntregaEstimada;
-    }
-
-    public LocalDateTime getFechaEntregaReal() {
-        return fechaEntregaReal;
-    }
-
-    public String getObservaciones() {
-        return observaciones;
-    }
-
-    public void setObservaciones(String observaciones) {
+    public void actualizarObservaciones(String observaciones) {
+        if (observaciones == null || observaciones.isBlank()) {
+            throw new IllegalArgumentException("Las observaciones no pueden estar vacías");
+        }
         this.observaciones = observaciones;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Despacho despacho = (Despacho) o;
-        return Objects.equals(id, despacho.id);
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
+    /* ===================== GETTERS ===================== */
 
-    @Override
-    public String toString() {
-        return String.format("Despacho{id='%s', pedidoId='%s', despachado=%s}",
-                id, pedidoId, estaDespachado());
-    }
+    public String getId() { return id; }
+    public String getPedidoId() { return pedidoId; }
+    public GuiaDespacho getGuiaDespacho() { return guiaDespacho; }
+    public Transportista getTransportista() { return transportista; }
+    public DireccionEntrega getDireccionEntrega() { return direccionEntrega; }
+    public LocalDateTime getFechaDespacho() { return fechaDespacho; }
+    public LocalDateTime getFechaEntregaEstimada() { return fechaEntregaEstimada; }
+    public LocalDateTime getFechaEntregaReal() { return fechaEntregaReal; }
+    public String getObservaciones() { return observaciones; }
+    public EstadoDespacho getEstado() { return estado; }
 }
