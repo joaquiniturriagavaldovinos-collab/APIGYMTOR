@@ -67,7 +67,6 @@ public class AgregarDireccionClienteUseCase {
                 new ClienteResponse();
 
         response.setId(cliente.getId());
-        response.setNombreCompleto(cliente.getNombreCompleto());
         response.setEmail(cliente.getEmail());
         response.setRut(cliente.getRut());
         response.setCantidadDirecciones(cliente.getDirecciones().size());

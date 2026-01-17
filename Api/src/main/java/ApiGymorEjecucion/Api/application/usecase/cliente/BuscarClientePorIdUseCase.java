@@ -35,7 +35,6 @@ public class BuscarClientePorIdUseCase {
         response.setId(cliente.getId());
         response.setNombre(cliente.getNombre());
         response.setApellido(cliente.getApellido());
-        response.setNombreCompleto(cliente.getNombreCompleto());
         response.setEmail(cliente.getEmail());
         response.setTelefono(cliente.getTelefono());
         response.setRut(cliente.getRut());
