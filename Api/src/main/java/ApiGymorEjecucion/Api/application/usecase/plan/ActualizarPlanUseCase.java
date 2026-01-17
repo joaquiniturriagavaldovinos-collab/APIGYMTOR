@@ -1,6 +1,7 @@
 package ApiGymorEjecucion.Api.application.usecase.plan;
 
 
+import ApiGymorEjecucion.Api.application.dto.request.plan.ActualizarPlanRequest;
 import ApiGymorEjecucion.Api.application.dto.response.plan.PlanResponse;
 import ApiGymorEjecucion.Api.domain.model.servicio.Plan;
 import ApiGymorEjecucion.Api.domain.repository.PlanRepository;
@@ -18,11 +19,6 @@ public class ActualizarPlanUseCase {
     }
 
     public PlanResponse ejecutar(String id, ActualizarPlanRequest request) {
-        // Validar
-        if (id == null || id.isBlank()) {
-            throw new IllegalArgumentException("El ID es requerido");
-        }
-
         // Buscar plan
         Plan plan = planRepository.buscarPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException(
@@ -30,9 +26,8 @@ public class ActualizarPlanUseCase {
                 ));
 
         // Actualizar precio
-        if (request.getNuevoPrecio() != null) {
-            plan.actualizarPrecio(request.getNuevoPrecio());
-        }
+        plan.actualizarPrecio(request.getNuevoPrecio());
+
 
         // Persistir
         Plan actualizado = planRepository.guardar(plan);
@@ -51,11 +46,4 @@ public class ActualizarPlanUseCase {
         return response;
     }
 
-    // DTO
-    public static class ActualizarPlanRequest {
-        private BigDecimal nuevoPrecio;
-
-        public BigDecimal getNuevoPrecio() { return nuevoPrecio; }
-        public void setNuevoPrecio(BigDecimal nuevoPrecio) { this.nuevoPrecio = nuevoPrecio; }
-    }
 }

@@ -19,7 +19,6 @@ public class CrearPlanUseCase {
     }
 
     public PlanResponse ejecutar(CrearPlanRequest request) {
-        // Validar
         validarRequest(request);
 
         // DOMINIO: Crear plan

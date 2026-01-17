@@ -12,5 +12,14 @@ public interface PlanRepository {
     Optional<Plan> buscarPorId(String id);
 
     List<Plan> buscarTodos();
-}
 
+    List<Plan> buscarActivos();
+
+    Optional<Plan> buscarPorNombre(String nombre);
+
+    boolean existePorNombre(String nombre);
+
+    boolean eliminar(String id);
+
+    long contar();
+}

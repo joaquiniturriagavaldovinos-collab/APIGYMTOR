@@ -1,6 +1,7 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
 
+import ApiGymorEjecucion.Api.application.dto.request.plan.ActualizarPlanRequest;
 import ApiGymorEjecucion.Api.application.dto.request.plan.CrearPlanRequest;
 import ApiGymorEjecucion.Api.application.dto.response.plan.PlanResponse;
 import ApiGymorEjecucion.Api.application.usecase.plan.ActualizarPlanUseCase;
@@ -38,7 +39,7 @@ public class PlanController {
         this.listarPlanesUseCase = listarPlanesUseCase;
     }
 
-    // 1️⃣ Crear Plan
+    // 1 Crear Plan
     @PostMapping
     public ResponseEntity<PlanResponse> crearPlan(
             @RequestBody CrearPlanRequest request
@@ -47,17 +48,17 @@ public class PlanController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // 2️⃣ Actualizar precio del plan
+    // 2 Actualizar precio del plan
     @PutMapping("/{id}/precio")
     public ResponseEntity<PlanResponse> actualizarPrecio(
             @PathVariable String id,
-            @RequestBody ActualizarPlanUseCase.ActualizarPlanRequest request
+            @RequestBody ActualizarPlanRequest request
     ) {
         PlanResponse response = actualizarPlanUseCase.ejecutar(id, request);
         return ResponseEntity.ok(response);
     }
 
-    // 3️⃣ Desactivar plan
+    // 3 Desactivar plan
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> desactivarPlan(
             @PathVariable String id
@@ -66,7 +67,7 @@ public class PlanController {
         return ResponseEntity.noContent().build();
     }
 
-    // 4️⃣ Listar planes activos
+    // 4 Listar planes activos
     @GetMapping
     public ResponseEntity<List<PlanResponse>> listarPlanes() {
         return ResponseEntity.ok(
@@ -74,7 +75,7 @@ public class PlanController {
         );
     }
 
-    // 5️⃣ Obtener plan por ID
+    // 5 Obtener plan por ID
     @GetMapping("/{id}")
     public ResponseEntity<PlanResponse> obtenerPorId(
             @PathVariable String id

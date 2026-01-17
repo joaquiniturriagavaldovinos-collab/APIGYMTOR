@@ -15,4 +15,17 @@ public interface ServicioRepository {
     List<Servicio> buscarPorModalidad(ModalidadClase modalidad);
 
     Optional<Servicio> buscarPorId(String id);
+
+    List<Servicio> buscarActivos();
+
+    Optional<Servicio> buscarPorNombre(String nombre);
+
+    boolean existePorNombre(String nombre);
+
+    boolean eliminar(String id);
+
+    long contar();
+
+
+
 }

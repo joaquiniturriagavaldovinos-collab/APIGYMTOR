@@ -15,4 +15,7 @@ public interface ServicioJpaRepository
     List<ServicioEntity> findByActivoTrue();
 
     List<ServicioEntity> findByModalidad(ModalidadClase modalidad);
+
+    boolean existsByNombre(String nombre);
+
 }

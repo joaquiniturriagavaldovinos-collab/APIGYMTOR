@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-
 @Repository
 public class PlanRepositoryJpa implements PlanRepository {
 
@@ -38,6 +37,39 @@ public class PlanRepositoryJpa implements PlanRepository {
                 .toList();
     }
 
+    @Override
+    public List<Plan> buscarActivos() {
+        return jpaRepository.findByActivoTrue()
+                .stream()
+                .map(this::mapToDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<Plan> buscarPorNombre(String nombre) {
+        return jpaRepository.findByNombreIgnoreCase(nombre)
+                .map(this::mapToDomain);
+    }
+
+    @Override
+    public boolean existePorNombre(String nombre) {
+        return jpaRepository.existsByNombreIgnoreCase(nombre);
+    }
+
+    @Override
+    public boolean eliminar(String id) {
+        if (!jpaRepository.existsById(id)) {
+            return false;
+        }
+        jpaRepository.deleteById(id);
+        return true;
+    }
+
+    @Override
+    public long contar() {
+        return jpaRepository.count();
+    }
+
     /* ===================== MAPPERS ===================== */
 
     private PlanEntity mapToJpa(Plan plan) {
@@ -47,6 +79,7 @@ public class PlanRepositoryJpa implements PlanRepository {
         entity.setDescripcion(plan.getDescripcion());
         entity.setPrecio(plan.getPrecio());
         entity.setDuracionMeses(plan.getDuracionMeses());
+        entity.setSesionesIncluidas(plan.getSesionesIncluidas());
         entity.setActivo(plan.isActivo());
         entity.setFechaCreacion(plan.getFechaCreacion());
         return entity;
@@ -64,5 +97,4 @@ public class PlanRepositoryJpa implements PlanRepository {
                 entity.getFechaCreacion()
         );
     }
-
 }

@@ -47,6 +47,45 @@ public class ServicioRepositoryJpa implements ServicioRepository {
                 .map(this::mapToDomain);
     }
 
+    @Override
+    public List<Servicio> buscarActivos() {
+        return jpaRepository.findByActivoTrue()
+                .stream()
+                .map(this::mapToDomain)
+                .toList();
+    }
+
+    @Override
+    public Optional<Servicio> buscarPorNombre(String nombre) {
+        return jpaRepository.findByNombre(nombre)
+                .map(this::mapToDomain);
+    }
+
+
+    @Override
+    public boolean existePorNombre(String nombre) {
+        return jpaRepository.existsByNombre(nombre);
+    }
+
+    @Override
+    public long contar() {
+        return jpaRepository.count();
+    }
+
+    @Override
+    public boolean eliminar(String id) {
+        if (!jpaRepository.existsById(id)) {
+            return false;
+        }
+        jpaRepository.deleteById(id);
+        return true;
+    }
+
+
+
+
+
+
     /* ===================== MAPPERS ===================== */
 
     private ServicioEntity mapToJpa(Servicio servicio) {

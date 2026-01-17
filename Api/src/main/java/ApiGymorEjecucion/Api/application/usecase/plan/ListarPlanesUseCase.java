@@ -19,11 +19,11 @@ public class ListarPlanesUseCase {
     }
 
     public List<PlanResponse> listarTodos() {
-        return planRepository.buscarTodos().stream()
-                .filter(Plan::isActivo)
+        return planRepository.buscarActivos().stream()
                 .map(this::mapearAResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
+
 
     public PlanResponse buscarPorId(String id) {
         if (id == null || id.isBlank()) {
