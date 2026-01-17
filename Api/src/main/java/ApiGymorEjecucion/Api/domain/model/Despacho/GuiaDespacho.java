@@ -1,12 +1,13 @@
 package ApiGymorEjecucion.Api.domain.model.Despacho;
 
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * Value Object: Guía de despacho
- */
+@Getter
 public class GuiaDespacho {
+
     private final String numero;
     private final LocalDateTime fechaEmision;
     private final String urlTracking;
@@ -19,23 +20,12 @@ public class GuiaDespacho {
 
     public static GuiaDespacho crear(String numero, String urlTracking) {
         if (numero == null || numero.isBlank()) {
-            throw new IllegalArgumentException("El número de guía es requerido");
+            throw new IllegalArgumentException("Número de guía requerido");
         }
         return new GuiaDespacho(numero, LocalDateTime.now(), urlTracking);
     }
 
-    // Getters
-    public String getNumero() {
-        return numero;
-    }
-
-    public LocalDateTime getFechaEmision() {
-        return fechaEmision;
-    }
-
-    public String getUrlTracking() {
-        return urlTracking;
-    }
+    /* === VALUE OBJECT === */
 
     @Override
     public boolean equals(Object o) {
@@ -52,6 +42,9 @@ public class GuiaDespacho {
 
     @Override
     public String toString() {
-        return String.format("GuiaDespacho{numero='%s', fecha=%s}", numero, fechaEmision);
+        return "GuiaDespacho{" +
+                "numero='" + numero + '\'' +
+                ", fechaEmision=" + fechaEmision +
+                '}';
     }
 }

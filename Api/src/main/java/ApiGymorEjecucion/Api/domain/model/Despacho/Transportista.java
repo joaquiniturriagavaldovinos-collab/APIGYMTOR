@@ -2,10 +2,8 @@ package ApiGymorEjecucion.Api.domain.model.Despacho;
 
 import java.util.Objects;
 
-/**
- * Value Object: Información del transportista
- */
 public class Transportista {
+
     private final String nombre;
     private final String codigo;
     private final String telefono;
@@ -18,15 +16,16 @@ public class Transportista {
 
     public static Transportista crear(String nombre, String codigo, String telefono) {
         if (nombre == null || nombre.isBlank()) {
-            throw new IllegalArgumentException("El nombre del transportista es requerido");
+            throw new IllegalArgumentException("Nombre requerido");
         }
         if (codigo == null || codigo.isBlank()) {
-            throw new IllegalArgumentException("El código del transportista es requerido");
+            throw new IllegalArgumentException("Código requerido");
         }
         return new Transportista(nombre, codigo, telefono);
     }
 
-    // Getters
+    /* === GETTERS === */
+
     public String getNombre() {
         return nombre;
     }
@@ -38,6 +37,8 @@ public class Transportista {
     public String getTelefono() {
         return telefono;
     }
+
+    /* === VALUE OBJECT === */
 
     @Override
     public boolean equals(Object o) {
@@ -54,6 +55,9 @@ public class Transportista {
 
     @Override
     public String toString() {
-        return String.format("Transportista{nombre='%s', codigo='%s'}", nombre, codigo);
+        return "Transportista{" +
+                "nombre='" + nombre + '\'' +
+                ", codigo='" + codigo + '\'' +
+                '}';
     }
 }
