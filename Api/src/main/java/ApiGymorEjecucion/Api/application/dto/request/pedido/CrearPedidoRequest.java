@@ -1,16 +1,32 @@
 package ApiGymorEjecucion.Api.application.dto.request.pedido;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 
 /**
  * DTO para solicitud de creación de pedido
  */
 public class CrearPedidoRequest {
+
+    /**
+     * ID externo opcional (para idempotencia o integraciones)
+     */
     private String pedidoId;
+
+    @NotBlank(message = "El ID del cliente es obligatorio")
     private String clienteId;
+
+    @NotNull(message = "El pedido debe contener ítems")
+    @NotEmpty(message = "El pedido debe contener al menos un ítem")
+    @Valid
     private List<ItemPedidoRequest> items;
 
     // Constructors
+
     public CrearPedidoRequest() {
     }
 
@@ -21,6 +37,7 @@ public class CrearPedidoRequest {
     }
 
     // Getters y Setters
+
     public String getPedidoId() {
         return pedidoId;
     }

@@ -1,20 +1,38 @@
 package ApiGymorEjecucion.Api.application.dto.request.pago;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 /**
  * DTO para webhook de confirmación de pago
  */
 public class ConfirmarPagoRequest {
+
+    @NotBlank(message = "El ID del pedido es obligatorio")
     private String pedidoId;
+
+    /**
+     * Indica si el pago fue exitoso o no
+     */
     private boolean exitoso;
+
+    @Size(max = 100, message = "La referencia de pago no puede superar los 100 caracteres")
     private String referenciaPago;
+
+    @Size(max = 255, message = "El motivo del fallo no puede superar los 255 caracteres")
     private String motivoFallo;
 
     // Constructors
+
     public ConfirmarPagoRequest() {
     }
 
-    public ConfirmarPagoRequest(String pedidoId, boolean exitoso,
-                                String referenciaPago, String motivoFallo) {
+    public ConfirmarPagoRequest(
+            String pedidoId,
+            boolean exitoso,
+            String referenciaPago,
+            String motivoFallo
+    ) {
         this.pedidoId = pedidoId;
         this.exitoso = exitoso;
         this.referenciaPago = referenciaPago;
@@ -22,6 +40,7 @@ public class ConfirmarPagoRequest {
     }
 
     // Getters y Setters
+
     public String getPedidoId() {
         return pedidoId;
     }
@@ -54,4 +73,3 @@ public class ConfirmarPagoRequest {
         this.motivoFallo = motivoFallo;
     }
 }
-

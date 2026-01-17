@@ -1,12 +1,30 @@
 package ApiGymorEjecucion.Api.application.dto.request.pago;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
 /**
  * DTO para solicitud de inicio de pago
  */
 public class IniciarPagoRequest {
+
+    @NotBlank(message = "El ID del pedido es obligatorio")
     private String pedidoId;
-    private String metodoPago; // "TARJETA", "TRANSFERENCIA", etc.
+
+    /**
+     * Método de pago permitido:
+     * - TARJETA
+     * - TRANSFERENCIA
+     */
+    @NotBlank(message = "El método de pago es obligatorio")
+    @Pattern(
+            regexp = "TARJETA|TRANSFERENCIA",
+            message = "El método de pago debe ser TARJETA o TRANSFERENCIA"
+    )
+    private String metodoPago;
 
     // Constructors
+
     public IniciarPagoRequest() {
     }
 
@@ -16,6 +34,7 @@ public class IniciarPagoRequest {
     }
 
     // Getters y Setters
+
     public String getPedidoId() {
         return pedidoId;
     }

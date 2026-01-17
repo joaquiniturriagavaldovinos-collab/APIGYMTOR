@@ -1,23 +1,57 @@
 package ApiGymorEjecucion.Api.application.dto.request.pedido;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 import java.math.BigDecimal;
 
 /**
- * DTO para un item dentro de la solicitud de pedido
+ * DTO para un ítem dentro de la solicitud de pedido
  */
 public class ItemPedidoRequest {
+
+    @NotBlank(message = "El ID del producto es obligatorio")
     private String productoId;
+
+    @NotBlank(message = "El nombre del producto es obligatorio")
+    @Size(max = 255, message = "El nombre del producto no puede superar los 255 caracteres")
     private String nombre;
-    private String tipo; // "PRODUCTO_FISICO" o "SERVICIO"
+
+    /**
+     * Tipo de ítem:
+     * - PRODUCTO_FISICO
+     * - SERVICIO
+     */
+    @NotBlank(message = "El tipo de ítem es obligatorio")
+    @Pattern(
+            regexp = "PRODUCTO_FISICO|SERVICIO",
+            message = "El tipo debe ser PRODUCTO_FISICO o SERVICIO"
+    )
+    private String tipo;
+
+    @Min(value = 1, message = "La cantidad debe ser al menos 1")
     private int cantidad;
+
+    @NotNull(message = "El precio unitario es obligatorio")
+    @DecimalMin(value = "0.01", message = "El precio unitario debe ser mayor a cero")
     private BigDecimal precioUnitario;
 
     // Constructors
+
     public ItemPedidoRequest() {
     }
 
-    public ItemPedidoRequest(String productoId, String nombre, String tipo,
-                             int cantidad, BigDecimal precioUnitario) {
+    public ItemPedidoRequest(
+            String productoId,
+            String nombre,
+            String tipo,
+            int cantidad,
+            BigDecimal precioUnitario
+    ) {
         this.productoId = productoId;
         this.nombre = nombre;
         this.tipo = tipo;
@@ -26,6 +60,7 @@ public class ItemPedidoRequest {
     }
 
     // Getters y Setters
+
     public String getProductoId() {
         return productoId;
     }

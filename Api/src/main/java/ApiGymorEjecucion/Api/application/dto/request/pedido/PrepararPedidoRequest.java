@@ -1,15 +1,24 @@
 package ApiGymorEjecucion.Api.application.dto.request.pedido;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 /**
  * DTO para solicitud de preparación de pedido
  */
 public class PrepararPedidoRequest {
+
+    @NotBlank(message = "El ID del pedido es obligatorio")
     private String pedidoId;
+
+    @NotBlank(message = "El ID del operador es obligatorio")
     private String operadorId;
+
+    @Size(max = 500, message = "Las observaciones no pueden superar los 500 caracteres")
     private String observaciones;
 
     // Constructors
+
     public PrepararPedidoRequest() {
     }
 
@@ -20,6 +29,7 @@ public class PrepararPedidoRequest {
     }
 
     // Getters y Setters
+
     public String getPedidoId() {
         return pedidoId;
     }
