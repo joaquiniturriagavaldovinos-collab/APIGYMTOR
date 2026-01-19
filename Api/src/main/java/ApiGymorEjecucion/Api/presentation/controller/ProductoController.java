@@ -1,6 +1,7 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
 
+import ApiGymorEjecucion.Api.application.dto.request.producto.CrearProductoRequest;
 import ApiGymorEjecucion.Api.application.dto.response.producto.ActualizarStockResponse;
 import ApiGymorEjecucion.Api.application.dto.response.producto.ProductoListResponse;
 import ApiGymorEjecucion.Api.application.dto.response.producto.ProductoResponse;
@@ -41,7 +42,7 @@ public class ProductoController {
     // 1️⃣ Crear producto
     @PostMapping
     public ResponseEntity<ProductoResponse> crearProducto(
-            @RequestBody CrearProductoUseCase.CrearProductoRequest request
+            @RequestBody CrearProductoRequest request
     ) {
         ProductoResponse response = crearProductoUseCase.ejecutar(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -93,9 +94,7 @@ public class ProductoController {
         );
     }
 
-    // =========================
-    // 📊 STOCK
-    // =========================
+
 
     // 7️⃣ Incrementar stock
     @PostMapping("/{id}/stock/incrementar")

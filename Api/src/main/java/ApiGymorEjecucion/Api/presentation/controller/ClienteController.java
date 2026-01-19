@@ -1,5 +1,6 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
+import ApiGymorEjecucion.Api.application.dto.request.cliente.ActualizarClienteRequest;
 import ApiGymorEjecucion.Api.application.dto.request.cliente.DireccionRequest;
 import ApiGymorEjecucion.Api.application.dto.request.cliente.RegistrarClienteRequest;
 import ApiGymorEjecucion.Api.application.dto.response.cliente.ClienteResponse;
@@ -115,8 +116,8 @@ public class ClienteController {
      * @return Lista de clientes (200 OK)
      */
     @GetMapping
-    public ResponseEntity<List<ListarClientesUseCase.ClienteListResponse>> listarClientes() {
-        List<ListarClientesUseCase.ClienteListResponse> clientes =
+    public ResponseEntity<List<ClienteListResponse>> listarClientes() {
+        List<ClienteListResponse> clientes =
                 listarClientesUseCase.listarTodos();
         return ResponseEntity.ok(clientes);
     }
@@ -129,10 +130,10 @@ public class ClienteController {
      * @return Lista de clientes que coinciden (200 OK)
      */
     @GetMapping("/buscar")
-    public ResponseEntity<List<ListarClientesUseCase.ClienteListResponse>> buscarPorTexto(
+    public ResponseEntity<List<ClienteListResponse>> buscarPorTexto(
             @RequestParam(required = false) String texto) {
 
-        List<ListarClientesUseCase.ClienteListResponse> clientes =
+        List<ClienteListResponse> clientes =
                 listarClientesUseCase.buscarPorTexto(texto);
         return ResponseEntity.ok(clientes);
     }
@@ -145,10 +146,10 @@ public class ClienteController {
      * @return Lista de clientes del tipo especificado (200 OK)
      */
     @GetMapping("/tipo/{tipo}")
-    public ResponseEntity<List<ListarClientesUseCase.ClienteListResponse>> listarPorTipo(
+    public ResponseEntity<List<ClienteListResponse>> listarPorTipo(
             @PathVariable String tipo) {
 
-        List<ListarClientesUseCase.ClienteListResponse> clientes =
+        List<ClienteListResponse> clientes =
                 listarClientesUseCase.listarPorTipo(tipo);
         return ResponseEntity.ok(clientes);
     }
@@ -164,7 +165,7 @@ public class ClienteController {
     @PutMapping("/{id}")
     public ResponseEntity<ClienteResponse> actualizarCliente(
             @PathVariable String id,
-            @Valid @RequestBody ActualizarClienteUseCase.ActualizarClienteRequest request) {
+            @Valid @RequestBody ActualizarClienteRequest request) {
 
         ClienteResponse response = actualizarClienteUseCase.ejecutar(id, request);
         return ResponseEntity.ok(response);

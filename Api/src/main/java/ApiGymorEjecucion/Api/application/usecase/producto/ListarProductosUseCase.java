@@ -123,9 +123,6 @@ public class ListarProductosUseCase {
         return response;
     }
 
-    // ========================
-    // DTO DE RESPUESTA
-    // ========================
 
 
 }

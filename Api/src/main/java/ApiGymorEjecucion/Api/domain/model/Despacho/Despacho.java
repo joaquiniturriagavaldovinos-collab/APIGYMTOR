@@ -80,6 +80,19 @@ public class Despacho {
         this.observaciones = observaciones;
     }
 
+    public void establecerFechaEntregaEstimada(LocalDateTime fechaEstimada) {
+        if (fechaEstimada == null) {
+            throw new IllegalArgumentException("La fecha estimada es obligatoria");
+        }
+
+        if (estado == EstadoDespacho.ENTREGADO) {
+            throw new IllegalStateException("No se puede modificar un despacho entregado");
+        }
+
+        this.fechaEntregaEstimada = fechaEstimada;
+    }
+
+
     /* === GETTERS (LECTURA) === */
 
     public String getId() {
@@ -120,5 +133,25 @@ public class Despacho {
 
     public EstadoDespacho getEstado() {
         return estado;
+    }
+
+    public boolean estaEntregado() {
+        return this.estado == EstadoDespacho.ENTREGADO;
+    }
+
+
+    public boolean estaDespachado() {
+        return this.estado == EstadoDespacho.EN_TRANSITO
+                || this.estado == EstadoDespacho.ENTREGADO;
+    }
+
+    /* === CONSULTAS DE ESTADO (Ubiquitous Language) === */
+
+    public boolean estaPendiente() {
+        return estado == EstadoDespacho.PENDIENTE;
+    }
+
+    public boolean estaEnTransito() {
+        return estado == EstadoDespacho.EN_TRANSITO;
     }
 }

@@ -4,12 +4,14 @@ import ApiGymorEjecucion.Api.domain.model.servicio.ModalidadClase;
 import ApiGymorEjecucion.Api.domain.model.servicio.Servicio;
 import ApiGymorEjecucion.Api.domain.repository.ServicioRepository;
 import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.ServicioEntity;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
+@Profile("Prod")
 public class ServicioRepositoryJpa implements ServicioRepository {
 
     private final ServicioJpaRepository jpaRepository;

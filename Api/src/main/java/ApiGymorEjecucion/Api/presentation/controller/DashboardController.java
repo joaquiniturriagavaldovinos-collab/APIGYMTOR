@@ -2,6 +2,7 @@ package ApiGymorEjecucion.Api.presentation.controller;
 
 import ApiGymorEjecucion.Api.application.dto.response.dashboard.MetricasGeneralesResponse;
 import ApiGymorEjecucion.Api.application.dto.response.dashboard.ProductoTopResponse;
+import ApiGymorEjecucion.Api.application.dto.response.dashboard.ResumenVentasResponse;
 import ApiGymorEjecucion.Api.application.usecase.dashboard.ObtenerMetricasGeneralesUseCase;
 import ApiGymorEjecucion.Api.application.usecase.dashboard.ObtenerResumenVentasUseCase;
 import ApiGymorEjecucion.Api.application.usecase.dashboard.ObtenerTopProductosUseCase;
@@ -44,7 +45,7 @@ public class DashboardController {
 
     // 2️⃣ Resumen de ventas (rango de fechas opcional)
     @GetMapping("/ventas/resumen")
-    public ResponseEntity<ObtenerResumenVentasUseCase.ResumenVentasResponse> obtenerResumenVentas(
+    public ResponseEntity<ResumenVentasResponse> obtenerResumenVentas(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate desde,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)

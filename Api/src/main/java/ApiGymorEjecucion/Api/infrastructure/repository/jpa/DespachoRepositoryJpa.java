@@ -7,12 +7,14 @@ import ApiGymorEjecucion.Api.domain.model.Despacho.DireccionEntrega;
 import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.despacho.embeddable.DireccionEntregaEmbeddable;
 import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.despacho.embeddable.GuiaDespachoEmbeddable;
 import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.despacho.embeddable.TransportistaEmbeddable;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
+@Profile("prod")
 public class DespachoRepositoryJpa implements DespachoRepository {
 
     private final DespachoJpaRepository jpa;

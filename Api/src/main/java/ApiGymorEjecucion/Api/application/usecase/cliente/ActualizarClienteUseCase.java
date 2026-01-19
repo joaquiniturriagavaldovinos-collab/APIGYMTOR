@@ -2,6 +2,7 @@ package ApiGymorEjecucion.Api.application.usecase.cliente;
 
 
 
+import ApiGymorEjecucion.Api.application.dto.request.cliente.ActualizarClienteRequest;
 import ApiGymorEjecucion.Api.application.dto.response.cliente.ClienteResponse;
 import ApiGymorEjecucion.Api.domain.model.Cliente.Cliente;
 import ApiGymorEjecucion.Api.domain.repository.ClienteRepository;
@@ -64,22 +65,5 @@ public class ActualizarClienteUseCase {
         response.setActivo(cliente.isActivo());
 
         return response;
-    }
-
-    // DTO
-    public static class ActualizarClienteRequest {
-        private String telefono;
-        private String nombre;
-        private String apellido;
-
-        // Getters y Setters
-        public String getTelefono() { return telefono; }
-        public void setTelefono(String telefono) { this.telefono = telefono; }
-
-        public String getNombre() { return nombre; }
-        public void setNombre(String nombre) { this.nombre = nombre; }
-
-        public String getApellido() { return apellido; }
-        public void setApellido(String apellido) { this.apellido = apellido; }
     }
 }
