@@ -1,21 +1,26 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
-
 import ApiGymorEjecucion.Api.application.dto.request.pago.ConfirmarPagoRequest;
-import ApiGymorEjecucion.Api.application.dto.request.pedido.CrearPedidoRequest;
-import ApiGymorEjecucion.Api.application.dto.request.pedido.DespacharPedidoRequest;
+import ApiGymorEjecucion.Api.application.dto.request.pedido.*;
 import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
 import ApiGymorEjecucion.Api.application.usecase.pedido.*;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Controller REST para operaciones sobre Pedidos.
- *
- * Este controller SOLO maneja HTTP y delega toda la lógica a los casos de uso.
- * NO contiene lógica de negocio.
- */
+@Tag(
+        name = "Pedidos",
+        description = "Gestión del ciclo de vida completo de los pedidos"
+)
 @RestController
 @RequestMapping("/api/pedidos")
 public class PedidoController {
@@ -49,7 +54,21 @@ public class PedidoController {
         this.consultarEstadoPedidoUseCase = consultarEstadoPedidoUseCase;
     }
 
-    // 1️⃣ Crear pedido
+    // -------------------------------------------------
+    // CREAR PEDIDO
+    // -------------------------------------------------
+    @Operation(
+            summary = "Crear pedido",
+            description = "Crea un nuevo pedido en estado inicial"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Pedido creado correctamente",
+                    content = @Content(schema = @Schema(implementation = PedidoResponse.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Datos del pedido inválidos", content = @Content)
+    })
     @PostMapping
     public ResponseEntity<PedidoResponse> crearPedido(
             @RequestBody CrearPedidoRequest request
@@ -58,25 +77,69 @@ public class PedidoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // 2️⃣ Consultar estado del pedido
+    // -------------------------------------------------
+    // CONSULTAR ESTADO DEL PEDIDO
+    // -------------------------------------------------
+    @Operation(
+            summary = "Consultar pedido",
+            description = "Obtiene el estado actual y detalle de un pedido"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pedido encontrado",
+                    content = @Content(schema = @Schema(implementation = PedidoResponse.class))
+            ),
+            @ApiResponse(responseCode = "404", description = "Pedido no encontrado", content = @Content)
+    })
     @GetMapping("/{pedidoId}")
     public ResponseEntity<PedidoResponse> consultarPedido(
+            @Parameter(description = "ID del pedido", example = "ped_123")
             @PathVariable String pedidoId
     ) {
         PedidoResponse response = consultarEstadoPedidoUseCase.ejecutar(pedidoId);
         return ResponseEntity.ok(response);
     }
 
-    // 3️⃣ Iniciar pago
+    // -------------------------------------------------
+    // INICIAR PAGO
+    // -------------------------------------------------
+    @Operation(
+            summary = "Iniciar pago de pedido",
+            description = "Inicia el proceso de pago para un pedido existente"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pago iniciado",
+                    content = @Content(schema = @Schema(implementation = PedidoResponse.class))
+            ),
+            @ApiResponse(responseCode = "404", description = "Pedido no encontrado", content = @Content)
+    })
     @PostMapping("/{pedidoId}/pago")
     public ResponseEntity<PedidoResponse> iniciarPago(
+            @Parameter(description = "ID del pedido", example = "ped_123")
             @PathVariable String pedidoId
     ) {
         PedidoResponse response = iniciarPagoPedidoUseCase.ejecutar(pedidoId);
         return ResponseEntity.ok(response);
     }
 
-    // 4️⃣ Confirmar resultado de pago (callback pasarela)
+    // -------------------------------------------------
+    // CONFIRMACIÓN DE PAGO (CALLBACK)
+    // -------------------------------------------------
+    @Operation(
+            summary = "Confirmar resultado de pago",
+            description = "Endpoint callback utilizado por la pasarela de pagos"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Resultado de pago confirmado",
+                    content = @Content(schema = @Schema(implementation = PedidoResponse.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Confirmación inválida", content = @Content)
+    })
     @PostMapping("/pago/confirmacion")
     public ResponseEntity<PedidoResponse> confirmarPago(
             @RequestBody ConfirmarPagoRequest request
@@ -85,16 +148,45 @@ public class PedidoController {
         return ResponseEntity.ok(response);
     }
 
-    // 5️⃣ Preparar pedido
+    // -------------------------------------------------
+    // PREPARAR PEDIDO
+    // -------------------------------------------------
+    @Operation(
+            summary = "Preparar pedido",
+            description = "Marca un pedido como preparado para despacho"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pedido preparado",
+                    content = @Content(schema = @Schema(implementation = PedidoResponse.class))
+            ),
+            @ApiResponse(responseCode = "409", description = "Estado inválido", content = @Content)
+    })
     @PostMapping("/{pedidoId}/preparacion")
     public ResponseEntity<PedidoResponse> prepararPedido(
+            @Parameter(description = "ID del pedido", example = "ped_123")
             @PathVariable String pedidoId
     ) {
         PedidoResponse response = prepararPedidoUseCase.ejecutar(pedidoId);
         return ResponseEntity.ok(response);
     }
 
-    // 6️⃣ Despachar pedido
+    // -------------------------------------------------
+    // DESPACHAR PEDIDO
+    // -------------------------------------------------
+    @Operation(
+            summary = "Despachar pedido",
+            description = "Despacha un pedido previamente preparado"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pedido despachado",
+                    content = @Content(schema = @Schema(implementation = PedidoResponse.class))
+            ),
+            @ApiResponse(responseCode = "409", description = "Estado inválido", content = @Content)
+    })
     @PostMapping("/despacho")
     public ResponseEntity<PedidoResponse> despacharPedido(
             @RequestBody DespacharPedidoRequest request
@@ -103,19 +195,50 @@ public class PedidoController {
         return ResponseEntity.ok(response);
     }
 
-    // 7️⃣ Confirmar entrega
+    // -------------------------------------------------
+    // CONFIRMAR ENTREGA
+    // -------------------------------------------------
+    @Operation(
+            summary = "Confirmar entrega de pedido",
+            description = "Confirma que el pedido fue entregado al cliente"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Entrega confirmada",
+                    content = @Content(schema = @Schema(implementation = PedidoResponse.class))
+            ),
+            @ApiResponse(responseCode = "409", description = "Estado inválido", content = @Content)
+    })
     @PostMapping("/{pedidoId}/entrega")
     public ResponseEntity<PedidoResponse> confirmarEntrega(
+            @Parameter(description = "ID del pedido", example = "ped_123")
             @PathVariable String pedidoId
     ) {
         PedidoResponse response = confirmarEntregaUseCase.ejecutar(pedidoId);
         return ResponseEntity.ok(response);
     }
 
-    // 8️⃣ Cancelar pedido
+    // -------------------------------------------------
+    // CANCELAR PEDIDO
+    // -------------------------------------------------
+    @Operation(
+            summary = "Cancelar pedido",
+            description = "Cancela un pedido indicando el motivo"
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pedido cancelado",
+                    content = @Content(schema = @Schema(implementation = PedidoResponse.class))
+            ),
+            @ApiResponse(responseCode = "409", description = "No se puede cancelar el pedido", content = @Content)
+    })
     @PostMapping("/{pedidoId}/cancelacion")
     public ResponseEntity<PedidoResponse> cancelarPedido(
+            @Parameter(description = "ID del pedido", example = "ped_123")
             @PathVariable String pedidoId,
+            @Parameter(description = "Motivo de cancelación", example = "Cliente solicitó anulación")
             @RequestParam String motivo
     ) {
         PedidoResponse response = cancelarPedidoUseCase.ejecutar(pedidoId, motivo);

@@ -1,0 +1,6 @@
+server:
+  port: 8080
+
+app:
+  cors:
+    allowed-origins: https://gymor.cl,https://www.gymor.cl
