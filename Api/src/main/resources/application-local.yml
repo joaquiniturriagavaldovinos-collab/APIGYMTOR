@@ -2,9 +2,22 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/gymor_local
     username: postgres
-    password: postgres
+    password: Negrito.12345
+    driver-class-name: org.postgresql.Driver
 
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  sql:
+    init:
+      mode: never
+
+app:
+  cors:
+    allowed-origins: "http://localhost:3000,http://localhost:5173,http://localhost:8080"

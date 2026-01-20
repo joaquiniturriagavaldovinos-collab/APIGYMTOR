@@ -1,9 +1,23 @@
+# Archivos de compilación y carpetas target
+/target/
+/bin/
+/out/
+
 # IDEs
-.idea/
-*.iml
+/.idea/
+/.vscode/
+/*.iml
 
 # Logs
 *.log
 
-# Build
-/target/
+# Dependencias descargadas por Maven
+/.mvn/wrapper/maven-wrapper.jar
+
+# Archivos sensibles / locales
+application-local.yml
+application-prod.yml
+application.yml
+
+# Configuración de base de datos, tokens, credenciales
+*.env
