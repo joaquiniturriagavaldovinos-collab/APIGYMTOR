@@ -1,6 +1,14 @@
-server:
-  port: 8080
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
 
 app:
   cors:
-    allowed-origins: https://gymor.cl,https://www.gymor.cl
+    allowed-origins: https://gymor.cl
