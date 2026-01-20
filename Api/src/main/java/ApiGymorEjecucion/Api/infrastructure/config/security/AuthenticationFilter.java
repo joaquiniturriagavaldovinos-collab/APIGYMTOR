@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +23,7 @@ import java.util.List;
  * - Usar Spring Security con JWT real
  * - Validar firma, expiración y roles
  */
+@Profile("local")
 @Component
 public class AuthenticationFilter extends OncePerRequestFilter {
 
@@ -87,10 +89,21 @@ public class AuthenticationFilter extends OncePerRequestFilter {
      * Define rutas públicas (sin JWT)
      */
     private boolean esRutaPublica(String path) {
-        return path.startsWith("/api/webhooks") ||      // Webhooks externos
-                path.equals("/api/productos") ||          // Catálogo
-                path.startsWith("/api/productos/") ||     // Detalle producto
-                path.equals("/api/clientes");             // Registro cliente
+        return
+                // Swagger / OpenAPI
+                path.startsWith("/v3/api-docs") ||
+                        path.startsWith("/swagger-ui") ||
+                        path.startsWith("/swagger-ui.html") ||
+
+                        // Webhooks externos
+                        path.startsWith("/api/webhooks") ||
+
+                        // Catálogo público
+                        path.equals("/api/productos") ||
+                        path.startsWith("/api/productos/") ||
+
+                        // Registro cliente
+                        path.equals("/api/clientes");
     }
 
     /**
@@ -130,4 +143,6 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
         response.getWriter().write(body);
     }
+
+
 }
