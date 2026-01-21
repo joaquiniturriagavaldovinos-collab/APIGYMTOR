@@ -5,6 +5,7 @@ import ApiGymorEjecucion.Api.domain.model.producto.Stock;
 import ApiGymorEjecucion.Api.domain.model.producto.TipoProducto;
 import ApiGymorEjecucion.Api.domain.repository.ProductoRepository;
 import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.ProductoEntity;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
@@ -16,7 +17,8 @@ import java.util.stream.Collectors;
  * Adaptador JPA para Producto (Arquitectura Hexagonal + DDD)
  */
 @Repository
-@Profile("prod")
+@Primary  // Prioridad sobre InMemory si ambos están activos
+@Profile("!test")  // Se activa en todos los perfiles EXCEPTO test
 public class ProductoRepositoryJpa implements ProductoRepository {
 
     private final ProductoJpaRepository jpaRepository;

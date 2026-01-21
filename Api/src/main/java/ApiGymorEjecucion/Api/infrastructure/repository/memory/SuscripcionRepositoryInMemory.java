@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * Para desarrollo y testing local (profile: local, dev, test)
  */
 @Repository
-@Profile({"local", "dev", "test"})
+@Profile("test")  // ← SOLO TESTS
 public class SuscripcionRepositoryInMemory implements SuscripcionRepository {
 
     private final Map<String, Suscripcion> suscripciones = new ConcurrentHashMap<>();

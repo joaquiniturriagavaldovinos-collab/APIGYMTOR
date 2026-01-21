@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * Los datos se pierden al reiniciar la aplicación
  */
 @Repository
-@Profile({"local", "dev", "test"})
+@Profile("test")  // ← SOLO TESTS
 public class PlanRepositoryInMemory implements PlanRepository {
 
     private final Map<String, Plan> planes = new ConcurrentHashMap<>();

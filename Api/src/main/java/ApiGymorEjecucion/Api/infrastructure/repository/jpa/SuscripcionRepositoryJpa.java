@@ -4,6 +4,7 @@ package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 import ApiGymorEjecucion.Api.domain.model.servicio.Suscripcion;
 import ApiGymorEjecucion.Api.domain.repository.SuscripcionRepository;
 import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.SuscripcionEntity;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
@@ -16,7 +17,8 @@ import java.util.stream.Collectors;
  * Adaptador JPA para Suscripción (Arquitectura Hexagonal + DDD)
  */
 @Repository
-@Profile("prod")
+@Primary  // Prioridad sobre InMemory si ambos están activos
+@Profile("!test")  // Se activa en todos los perfiles EXCEPTO test
 public class SuscripcionRepositoryJpa implements SuscripcionRepository {
 
     private final SuscripcionJpaRepository jpaRepository;

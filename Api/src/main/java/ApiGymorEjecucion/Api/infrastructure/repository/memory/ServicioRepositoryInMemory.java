@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  * Para desarrollo y testing local (profile: local, dev, test)
  */
 @Repository
-@Profile({"local", "dev", "test"})
+@Profile("test")  // ← SOLO TESTS
 public class ServicioRepositoryInMemory implements ServicioRepository {
 
     private final Map<String, Servicio> servicios = new ConcurrentHashMap<>();

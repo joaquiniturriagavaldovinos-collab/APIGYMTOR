@@ -1,23 +1,53 @@
 spring:
+  config:
+    activate:
+      on-profile: local
+
+  # Base de datos PostgreSQL local
   datasource:
     url: jdbc:postgresql://localhost:5432/gymor_local
     username: postgres
     password: Negrito.12345
     driver-class-name: org.postgresql.Driver
 
+    # Pool de conexiones HikariCP
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 30000
+
+  # Configuración JPA/Hibernate para desarrollo
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: update  # ← Crea/actualiza tablas automáticamente
+    show-sql: true      # ← Muestra queries SQL
     properties:
       hibernate:
         format_sql: true
+        use_sql_comments: true
+        highlight_sql: true
 
+  # No ejecutar scripts SQL al inicio
   sql:
     init:
       mode: never
 
+# CORS para desarrollo (múltiples orígenes)
 app:
   cors:
     allowed-origins: "http://localhost:3000,http://localhost:5173,http://localhost:8080"
+
+# JWT Mock para local
+security:
+  jwt:
+    secret: "mock-secret-key-for-local-development-only-not-for-production-use"
+
+# Logging detallado en local
+logging:
+  level:
+    ApiGymorEjecucion.Api: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

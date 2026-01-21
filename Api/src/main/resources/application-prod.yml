@@ -1,14 +1,57 @@
 spring:
+  config:
+    activate:
+      on-profile: prod
+
+  # Base de datos desde variables de entorno
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASS}
+    driver-class-name: org.postgresql.Driver
 
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # Configuración JPA para producción
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: validate  # ← NO modifica esquema
     show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          batch_size: 20
 
+  sql:
+    init:
+      mode: never
+
+# CORS restrictivo para producción
 app:
   cors:
-    allowed-origins: https://gymor.cl
+    allowed-origins: "https://gymor.cl,https://www.gymor.cl,https://api.gymor.cl"
+
+# JWT real con clave segura
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+
+# Logging restrictivo en producción
+logging:
+  level:
+    ApiGymorEjecucion.Api: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+
+  file:
+    name: /var/log/gymor-api/application.log
+    max-size: 10MB
+    max-history: 30

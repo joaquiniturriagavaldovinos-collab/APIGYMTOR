@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * Esta implementación es para desarrollo local.
  */
 @Repository
-@Profile({"local", "test"})
+@Profile("test")  // ← SOLO TESTS
 public class PedidoRepositoryInMemory implements PedidoRepository {
 
     private final Map<String, Pedido> pedidos = new ConcurrentHashMap<>();

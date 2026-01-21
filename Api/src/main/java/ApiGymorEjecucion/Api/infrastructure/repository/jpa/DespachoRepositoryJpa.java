@@ -7,6 +7,7 @@ import ApiGymorEjecucion.Api.domain.model.Despacho.DireccionEntrega;
 import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.despacho.embeddable.DireccionEntregaEmbeddable;
 import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.despacho.embeddable.GuiaDespachoEmbeddable;
 import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.despacho.embeddable.TransportistaEmbeddable;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +15,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-@Profile("prod")
+@Primary  // Prioridad sobre InMemory si ambos están activos
+@Profile("!test")  // Se activa en todos los perfiles EXCEPTO test
 public class DespachoRepositoryJpa implements DespachoRepository {
 
     private final DespachoJpaRepository jpa;

@@ -18,8 +18,7 @@ import java.util.stream.Collectors;
  * Implementación en memoria del repositorio de Productos
  */
 @Repository
-@Profile({"local", "test"})
-
+@Profile("test")  // ← SOLO TESTS
 public class ProductoRepositoryInMemory implements ProductoRepository {
 
     private final Map<String, Producto> productos = new ConcurrentHashMap<>();

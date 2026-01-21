@@ -3,13 +3,15 @@ package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 import ApiGymorEjecucion.Api.domain.model.servicio.Plan;
 import ApiGymorEjecucion.Api.domain.repository.PlanRepository;
 import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.PlanEntity;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
+
 @Repository
-@Profile("prod")
+@Primary  // Prioridad sobre InMemory si ambos están activos
+@Profile("!test")  // Se activa en todos los perfiles EXCEPTO test
 public class PlanRepositoryJpa implements PlanRepository {
 
     private final PlanJpaRepository jpaRepository;

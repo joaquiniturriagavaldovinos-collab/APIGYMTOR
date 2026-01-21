@@ -3,6 +3,7 @@ package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 import ApiGymorEjecucion.Api.domain.model.pedido.*;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
 import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.PedidoEntity;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
@@ -16,7 +17,8 @@ import java.util.stream.Collectors;
  * Adaptador JPA para Pedido (Arquitectura Hexagonal + DDD)
  */
 @Repository
-@Profile("prod")
+@Primary  // Prioridad sobre InMemory si ambos están activos
+@Profile("!test")  // Se activa en todos los perfiles EXCEPTO test
 public class PedidoRepositoryJpa implements PedidoRepository {
 
     private final PedidoJpaRepository jpaRepository;

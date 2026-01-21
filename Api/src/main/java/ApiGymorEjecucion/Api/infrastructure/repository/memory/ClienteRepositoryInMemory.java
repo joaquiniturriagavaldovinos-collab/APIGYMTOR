@@ -1,6 +1,5 @@
 package ApiGymorEjecucion.Api.infrastructure.repository.memory;
 
-
 import ApiGymorEjecucion.Api.domain.model.Cliente.Cliente;
 import ApiGymorEjecucion.Api.domain.model.Cliente.TipoCliente;
 import ApiGymorEjecucion.Api.domain.repository.ClienteRepository;
@@ -16,9 +15,13 @@ import java.util.stream.Collectors;
 
 /**
  * Implementación en memoria del repositorio de Clientes
+ *
+ * ⚠️ SOLO PARA TESTS UNITARIOS
+ *
+ * En local y producción se usa ClienteRepositoryJpa con PostgreSQL
  */
 @Repository
-@Profile({"local", "test"})
+@Profile("test")  // ← SOLO TESTS
 public class ClienteRepositoryInMemory implements ClienteRepository {
 
     private final Map<String, Cliente> clientes = new ConcurrentHashMap<>();

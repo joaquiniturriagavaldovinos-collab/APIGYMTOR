@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
-@Profile({"local", "dev", "test"})
+@Profile("test")  // ← SOLO TESTS
 public class DespachoRepositoryInMemory implements DespachoRepository {
 
     private final Map<String, Despacho> despachos = new ConcurrentHashMap<>();
