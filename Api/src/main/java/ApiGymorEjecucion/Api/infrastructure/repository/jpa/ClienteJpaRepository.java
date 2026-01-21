@@ -1,6 +1,7 @@
 package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.ClienteEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.cliente.ClienteEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.cliente.TipoClienteEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,7 +19,7 @@ public interface ClienteJpaRepository extends JpaRepository<ClienteEntity, Strin
 
     boolean existsByEmail(String email);
 
-    List<ClienteEntity> findByTipo(ClienteEntity.TipoClienteEntity tipo);
+    List<ClienteEntity> findByTipo(TipoClienteEntity tipo);
 
     List<ClienteEntity> findByActivoTrue();
 }

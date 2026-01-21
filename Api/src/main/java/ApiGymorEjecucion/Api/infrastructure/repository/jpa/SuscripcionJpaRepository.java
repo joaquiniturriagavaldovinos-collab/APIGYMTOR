@@ -1,6 +1,6 @@
 package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.SuscripcionEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.suscripcion.SuscripcionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

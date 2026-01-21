@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.infrastructure.config;
+package ApiGymorEjecucion.Api.infrastructure.config.openapi;
 
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;

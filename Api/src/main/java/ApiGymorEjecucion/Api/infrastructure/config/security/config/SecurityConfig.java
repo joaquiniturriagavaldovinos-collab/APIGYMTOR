@@ -1,5 +1,6 @@
-package ApiGymorEjecucion.Api.infrastructure.config.security;
+package ApiGymorEjecucion.Api.infrastructure.config.security.config;
 
+import ApiGymorEjecucion.Api.infrastructure.config.security.filter.AuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -78,6 +79,8 @@ public class SecurityConfig {
                             ).permitAll()
 
                             // ===== TODAS LAS DEMÁS RUTAS REQUIEREN AUTENTICACIÓN =====
+                            // IMPORTANTE: authenticated() permite cualquier usuario autenticado
+                            // sin importar sus roles/authorities
                             .anyRequest().authenticated()
                     )
 

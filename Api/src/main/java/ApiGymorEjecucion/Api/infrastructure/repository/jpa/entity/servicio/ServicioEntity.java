@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity;
+package ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.servicio;
 
 import ApiGymorEjecucion.Api.domain.model.servicio.ModalidadClase;
 import jakarta.persistence.*;

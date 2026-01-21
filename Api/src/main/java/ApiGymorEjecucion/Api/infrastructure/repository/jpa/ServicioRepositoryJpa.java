@@ -3,7 +3,7 @@ package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 import ApiGymorEjecucion.Api.domain.model.servicio.ModalidadClase;
 import ApiGymorEjecucion.Api.domain.model.servicio.Servicio;
 import ApiGymorEjecucion.Api.domain.repository.ServicioRepository;
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.ServicioEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.servicio.ServicioEntity;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;

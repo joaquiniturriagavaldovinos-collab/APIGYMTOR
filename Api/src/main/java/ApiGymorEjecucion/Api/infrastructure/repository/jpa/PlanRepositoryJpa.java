@@ -2,7 +2,7 @@ package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 
 import ApiGymorEjecucion.Api.domain.model.servicio.Plan;
 import ApiGymorEjecucion.Api.domain.repository.PlanRepository;
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.PlanEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.plan.PlanEntity;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;

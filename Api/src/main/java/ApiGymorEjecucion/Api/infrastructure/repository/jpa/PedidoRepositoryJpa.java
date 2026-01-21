@@ -2,13 +2,15 @@ package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 
 import ApiGymorEjecucion.Api.domain.model.pedido.*;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.PedidoEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.pedido.EstadoPedidoEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.pedido.PedidoEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.pedido.embeddable.ItemPedidoEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.pedido.embeddable.TransicionEstadoEntity;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Field;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,8 +51,8 @@ public class PedidoRepositoryJpa implements PedidoRepository {
 
     @Override
     public List<Pedido> buscarPorEstado(EstadoPedido estado) {
-        PedidoEntity.EstadoPedidoEntity estadoEntity =
-                PedidoEntity.EstadoPedidoEntity.valueOf(estado.name());
+        EstadoPedidoEntity estadoEntity =
+                EstadoPedidoEntity.valueOf(estado.name());
 
         return jpaRepository.findByEstado(estadoEntity).stream()
                 .map(this::mapearADominio)
@@ -89,7 +91,7 @@ public class PedidoRepositoryJpa implements PedidoRepository {
         PedidoEntity entity = new PedidoEntity(
                 pedido.getId(),
                 pedido.getClienteId(),
-                PedidoEntity.EstadoPedidoEntity.valueOf(pedido.getEstado().name()),
+                EstadoPedidoEntity.valueOf(pedido.getEstado().name()),
                 pedido.calcularTotal(),
                 pedido.getFechaCreacion()
         );
@@ -99,13 +101,13 @@ public class PedidoRepositoryJpa implements PedidoRepository {
         entity.setGuiaDespacho(pedido.getGuiaDespacho());
 
         // Mapear items
-        List<PedidoEntity.ItemPedidoEntity> itemsEntity = pedido.getItems().stream()
+        List<ItemPedidoEntity> itemsEntity = pedido.getItems().stream()
                 .map(this::mapearItemAEntity)
                 .collect(Collectors.toList());
         entity.setItems(itemsEntity);
 
         // Mapear historial de transiciones
-        List<PedidoEntity.TransicionEstadoEntity> historialEntity =
+        List<TransicionEstadoEntity> historialEntity =
                 pedido.getHistorialEstados().stream()
                         .map(this::mapearTransicionAEntity)
                         .collect(Collectors.toList());
@@ -168,8 +170,8 @@ public class PedidoRepositoryJpa implements PedidoRepository {
         return pedido;
     }
 
-    private PedidoEntity.ItemPedidoEntity mapearItemAEntity(ItemPedido item) {
-        return new PedidoEntity.ItemPedidoEntity(
+    private ItemPedidoEntity mapearItemAEntity(ItemPedido item) {
+        return new ItemPedidoEntity(
                 item.getProductoId(),
                 item.getNombre(),
                 item.getTipo().name(),
@@ -179,7 +181,7 @@ public class PedidoRepositoryJpa implements PedidoRepository {
         );
     }
 
-    private ItemPedido mapearItemADominio(PedidoEntity.ItemPedidoEntity entity) {
+    private ItemPedido mapearItemADominio(ItemPedidoEntity entity) {
         return ItemPedido.crear(
                 entity.getProductoId(),
                 entity.getNombre(),
@@ -189,20 +191,20 @@ public class PedidoRepositoryJpa implements PedidoRepository {
         );
     }
 
-    private PedidoEntity.TransicionEstadoEntity mapearTransicionAEntity(TransicionEstado trans) {
-        PedidoEntity.EstadoPedidoEntity estadoAnterior = trans.getEstadoAnterior() != null
-                ? PedidoEntity.EstadoPedidoEntity.valueOf(trans.getEstadoAnterior().name())
+    private TransicionEstadoEntity mapearTransicionAEntity(TransicionEstado trans) {
+        EstadoPedidoEntity estadoAnterior = trans.getEstadoAnterior() != null
+                ? EstadoPedidoEntity.valueOf(trans.getEstadoAnterior().name())
                 : null;
 
-        return new PedidoEntity.TransicionEstadoEntity(
+        return new TransicionEstadoEntity(
                 estadoAnterior,
-                PedidoEntity.EstadoPedidoEntity.valueOf(trans.getEstadoNuevo().name()),
+                EstadoPedidoEntity.valueOf(trans.getEstadoNuevo().name()),
                 trans.getFechaTransicion(),
                 trans.getObservacion()
         );
     }
 
-    private TransicionEstado mapearTransicionADominio(PedidoEntity.TransicionEstadoEntity entity) {
+    private TransicionEstado mapearTransicionADominio(TransicionEstadoEntity entity) {
         EstadoPedido estadoAnterior = entity.getEstadoAnterior() != null
                 ? EstadoPedido.valueOf(entity.getEstadoAnterior().name())
                 : null;

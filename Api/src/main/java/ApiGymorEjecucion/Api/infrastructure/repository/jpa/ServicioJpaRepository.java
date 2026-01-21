@@ -1,7 +1,7 @@
 package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 
 import ApiGymorEjecucion.Api.domain.model.servicio.ModalidadClase;
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.ServicioEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.servicio.ServicioEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

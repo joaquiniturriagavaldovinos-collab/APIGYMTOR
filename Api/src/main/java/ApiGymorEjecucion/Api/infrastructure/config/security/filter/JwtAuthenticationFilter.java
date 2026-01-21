@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.infrastructure.config.security;
+package ApiGymorEjecucion.Api.infrastructure.config.security.filter;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;

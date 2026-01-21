@@ -1,10 +1,9 @@
 package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 
 import ApiGymorEjecucion.Api.domain.model.Pago.EstadoPago;
-import ApiGymorEjecucion.Api.domain.model.Pago.MetodoPago;
 import ApiGymorEjecucion.Api.domain.model.Pago.Pago;
 import ApiGymorEjecucion.Api.domain.repository.PagoRepository;
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.PagoEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.pago.PagoEntity;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;

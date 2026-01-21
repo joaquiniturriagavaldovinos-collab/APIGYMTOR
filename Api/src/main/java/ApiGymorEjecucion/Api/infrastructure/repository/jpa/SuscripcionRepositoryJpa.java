@@ -3,7 +3,7 @@ package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 
 import ApiGymorEjecucion.Api.domain.model.servicio.Suscripcion;
 import ApiGymorEjecucion.Api.domain.repository.SuscripcionRepository;
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.SuscripcionEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.suscripcion.SuscripcionEntity;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;

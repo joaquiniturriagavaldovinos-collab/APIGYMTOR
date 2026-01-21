@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity;
+package ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.pago;
 
 import ApiGymorEjecucion.Api.domain.model.Pago.EstadoPago;
 import ApiGymorEjecucion.Api.domain.model.Pago.MetodoPago;

@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity;
+package ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.suscripcion;
 
 import jakarta.persistence.*;
 

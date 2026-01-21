@@ -1,6 +1,6 @@
 package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.PlanEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.plan.PlanEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -4,7 +4,9 @@ import ApiGymorEjecucion.Api.domain.model.Cliente.Cliente;
 import ApiGymorEjecucion.Api.domain.model.Cliente.DireccionEntrega;
 import ApiGymorEjecucion.Api.domain.model.Cliente.TipoCliente;
 import ApiGymorEjecucion.Api.domain.repository.ClienteRepository;
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.ClienteEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.cliente.ClienteEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.cliente.TipoClienteEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.cliente.embeddable.DireccionEntregaEntity;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
@@ -62,8 +64,8 @@ public class ClienteRepositoryJpa implements ClienteRepository {
 
     @Override
     public List<Cliente> buscarPorTipo(TipoCliente tipo) {
-        ClienteEntity.TipoClienteEntity tipoEntity =
-                ClienteEntity.TipoClienteEntity.valueOf(tipo.name());
+        TipoClienteEntity tipoEntity =
+                TipoClienteEntity.valueOf(tipo.name());
 
         return jpaRepository.findByTipo(tipoEntity).stream()
                 .map(this::mapearADominio)
@@ -118,7 +120,7 @@ public class ClienteRepositoryJpa implements ClienteRepository {
                 cliente.getEmail(),
                 cliente.getTelefono(),
                 cliente.getRut(),
-                ClienteEntity.TipoClienteEntity.valueOf(cliente.getTipo().name()),
+                TipoClienteEntity.valueOf(cliente.getTipo().name()),
                 cliente.getFechaRegistro()
         );
 
@@ -174,10 +176,10 @@ public class ClienteRepositoryJpa implements ClienteRepository {
 
     // ===== VALUE OBJECT: Dirección =====
 
-    private ClienteEntity.DireccionEntregaEntity mapearDireccionAEntity(
+    private DireccionEntregaEntity mapearDireccionAEntity(
             DireccionEntrega direccion) {
 
-        return new ClienteEntity.DireccionEntregaEntity(
+        return new DireccionEntregaEntity(
                 direccion.getCalle(),
                 direccion.getNumero(),
                 direccion.getComuna(),
@@ -189,7 +191,7 @@ public class ClienteRepositoryJpa implements ClienteRepository {
     }
 
     private DireccionEntrega mapearDireccionADominio(
-            ClienteEntity.DireccionEntregaEntity entity) {
+            DireccionEntregaEntity entity) {
 
         return DireccionEntrega.crear(
                 entity.getCalle(),

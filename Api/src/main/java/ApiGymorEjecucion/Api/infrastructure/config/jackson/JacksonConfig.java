@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.infrastructure.config;
+package ApiGymorEjecucion.Api.infrastructure.config.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

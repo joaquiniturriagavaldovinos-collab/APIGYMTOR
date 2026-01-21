@@ -4,7 +4,9 @@ import ApiGymorEjecucion.Api.domain.model.producto.Producto;
 import ApiGymorEjecucion.Api.domain.model.producto.Stock;
 import ApiGymorEjecucion.Api.domain.model.producto.TipoProducto;
 import ApiGymorEjecucion.Api.domain.repository.ProductoRepository;
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.ProductoEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.producto.ProductoEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.producto.TipoProductoEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.producto.embeddable.StockEntity;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
@@ -62,8 +64,8 @@ public class ProductoRepositoryJpa implements ProductoRepository {
 
     @Override
     public List<Producto> buscarPorTipo(TipoProducto tipo) {
-        ProductoEntity.TipoProductoEntity tipoEntity =
-                ProductoEntity.TipoProductoEntity.valueOf(tipo.name());
+        TipoProductoEntity tipoEntity =
+                TipoProductoEntity.valueOf(tipo.name());
 
         return jpaRepository.findByTipo(tipoEntity).stream()
                 .map(this::mapearADominio)
@@ -108,7 +110,7 @@ public class ProductoRepositoryJpa implements ProductoRepository {
                 producto.getCodigo(),
                 producto.getNombre(),
                 producto.getDescripcion(),
-                ProductoEntity.TipoProductoEntity.valueOf(producto.getTipo().name()),
+                TipoProductoEntity.valueOf(producto.getTipo().name()),
                 producto.getPrecio(),
                 producto.getFechaCreacion()
         );
@@ -119,7 +121,7 @@ public class ProductoRepositoryJpa implements ProductoRepository {
         // Mapear stock si existe
         if (producto.getStock() != null) {
             Stock stock = producto.getStock();
-            entity.setStock(new ProductoEntity.StockEntity(
+            entity.setStock(new StockEntity(
                     stock.getCantidad(),
                     stock.getCantidadReservada(),
                     stock.getCantidadDisponible()
@@ -142,7 +144,7 @@ public class ProductoRepositoryJpa implements ProductoRepository {
 
         // Restaurar stock si existe
         if (entity.getStock() != null) {
-            ProductoEntity.StockEntity stockEntity = entity.getStock();
+            StockEntity stockEntity = entity.getStock();
             Stock stock = Stock.crearConReservas(
                     stockEntity.getCantidad(),
                     stockEntity.getCantidadReservada()

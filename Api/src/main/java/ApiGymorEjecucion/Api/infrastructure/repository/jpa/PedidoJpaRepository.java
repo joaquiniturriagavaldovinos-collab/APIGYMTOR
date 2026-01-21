@@ -1,6 +1,7 @@
 package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.PedidoEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.pedido.EstadoPedidoEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.pedido.PedidoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,5 +14,5 @@ import java.util.List;
 @Repository
 public interface PedidoJpaRepository extends JpaRepository<PedidoEntity, String> {
     List<PedidoEntity> findByClienteId(String clienteId);
-    List<PedidoEntity> findByEstado(PedidoEntity.EstadoPedidoEntity estado);
+    List<PedidoEntity> findByEstado(EstadoPedidoEntity estado);
 }

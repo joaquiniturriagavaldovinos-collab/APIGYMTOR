@@ -1,7 +1,7 @@
 package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 
 import ApiGymorEjecucion.Api.domain.model.Pago.EstadoPago;
-import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.PagoEntity;
+import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.pago.PagoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

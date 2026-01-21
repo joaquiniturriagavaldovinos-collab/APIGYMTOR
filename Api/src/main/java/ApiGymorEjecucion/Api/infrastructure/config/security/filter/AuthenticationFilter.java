@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.infrastructure.config.security;
+package ApiGymorEjecucion.Api.infrastructure.config.security.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -79,12 +79,13 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Setear contexto de seguridad MOCK
+        // Setear contexto de seguridad MOCK con authorities
+        // IMPORTANTE: Spring Security necesita al menos un authority
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
                         "mock-user-id",  // En JWT real: userId extraído del token
                         null,
-                        List.of()        // En JWT real: roles extraídos del token
+                        List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_USER"))  // ← AGREGADO
                 );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);

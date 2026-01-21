@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.infrastructure.config;
+package ApiGymorEjecucion.Api.infrastructure.config.web;
 
 
 import org.springframework.beans.factory.annotation.Value;
