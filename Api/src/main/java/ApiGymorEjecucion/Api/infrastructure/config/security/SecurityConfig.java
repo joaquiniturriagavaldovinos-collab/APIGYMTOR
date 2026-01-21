@@ -4,35 +4,90 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Configuración de seguridad para Spring Security
+ *
+ * RUTAS PÚBLICAS (sin autenticación):
+ * - Swagger/OpenAPI
+ * - Webhooks externos (pasarelas de pago)
+ * - Catálogo de productos (GET)
+ * - Registro de clientes (POST)
+ *
+ * RUTAS PROTEGIDAS (requieren JWT):
+ * - Todas las demás operaciones de la API
+ */
 @Configuration
-@Profile("local")
+@EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    // =========================================================================
+    // CONFIGURACIÓN PARA LOCAL (DESARROLLO)
+    // =========================================================================
+    @Profile("local")
+    @Configuration
+    public static class LocalSecurityConfig {
 
-        http
-                //  Desactivar CSRF (API REST)
-                .csrf(csrf -> csrf.disable())
+        private final AuthenticationFilter authenticationFilter;
 
-                //  Desactivar login por formulario
-                .formLogin(form -> form.disable())
+        public LocalSecurityConfig(AuthenticationFilter authenticationFilter) {
+            this.authenticationFilter = authenticationFilter;
+        }
 
-                //  Desactivar Basic Auth (esto quita el popup)
-                .httpBasic(basic -> basic.disable())
+        @Bean
+        public SecurityFilterChain localFilterChain(HttpSecurity http) throws Exception {
+            http
+                    // API REST sin estado (stateless)
+                    .sessionManagement(session ->
+                            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                //  Permitir Swagger y OpenAPI
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-                        .anyRequest().permitAll()
-                );
+                    // Desactivar CSRF (no necesario en API REST)
+                    .csrf(csrf -> csrf.disable())
 
-        return http.build();
+                    // Desactivar formulario de login
+                    .formLogin(form -> form.disable())
+
+                    // Desactivar HTTP Basic (evita popup de login)
+                    .httpBasic(basic -> basic.disable())
+
+                    // Configurar autorizaciones
+                    .authorizeHttpRequests(auth -> auth
+                            // ===== SWAGGER / OPENAPI =====
+                            .requestMatchers(
+                                    "/v3/api-docs/**",
+                                    "/swagger-ui/**",
+                                    "/swagger-ui.html"
+                            ).permitAll()
+
+                            // ===== WEBHOOKS (PASARELAS DE PAGO) =====
+                            .requestMatchers("/api/webhooks/**").permitAll()
+
+                            // ===== CATÁLOGO PÚBLICO DE PRODUCTOS =====
+                            .requestMatchers(
+                                    "/api/productos",           // Listar todos
+                                    "/api/productos/**"         // Ver detalle, buscar por tipo, etc.
+                            ).permitAll()
+
+                            // ===== REGISTRO DE CLIENTE (PÚBLICO) =====
+                            .requestMatchers(
+                                    "/api/v1/clientes"          // POST crear cliente (público)
+                            ).permitAll()
+
+                            // ===== TODAS LAS DEMÁS RUTAS REQUIEREN AUTENTICACIÓN =====
+                            .anyRequest().authenticated()
+                    )
+
+                    // Agregar filtro JWT MOCK antes del filtro de autenticación
+                    .addFilterBefore(
+                            authenticationFilter,
+                            UsernamePasswordAuthenticationFilter.class
+                    );
+
+            return http.build();
+        }
     }
 }

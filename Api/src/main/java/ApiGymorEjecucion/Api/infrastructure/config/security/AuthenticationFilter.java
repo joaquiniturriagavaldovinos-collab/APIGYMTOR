@@ -19,9 +19,10 @@ import java.util.List;
 /**
  * Filtro de autenticación JWT (MOCK para desarrollo)
  *
- * ⚠️ En producción:
- * - Usar Spring Security con JWT real
- * - Validar firma, expiración y roles
+ * ⚠️ SOLO PARA LOCAL - En producción usar JwtAuthenticationFilter
+ *
+ * Este filtro acepta cualquier token que no esté vacío.
+ * No valida firma ni expiración.
  */
 @Profile("local")
 @Component
@@ -38,48 +39,57 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
+        String method = request.getMethod();
 
-        // Rutas públicas
-        if (esRutaPublica(path)) {
+        // Log para debug
+        logger.debug("🔍 Filtrando: " + method + " " + path);
+
+        // Si es ruta pública, continuar sin validar token
+        if (esRutaPublica(path, method)) {
+            logger.debug("✅ Ruta pública, permitiendo acceso sin token");
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Header Authorization
+        // Rutas protegidas requieren token
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
+            logger.warn("❌ Token no proporcionado para: " + path);
             escribirError(
                     response,
                     request,
                     HttpStatus.UNAUTHORIZED,
-                    "Token no proporcionado"
+                    "Token no proporcionado. Usa: Authorization: Bearer <token>"
             );
             return;
         }
 
         String token = authHeader.substring(BEARER_PREFIX.length());
 
-        // Validación MOCK
+        // Validación MOCK (solo verifica que no esté vacío)
         if (!validarToken(token)) {
+            logger.warn("❌ Token inválido para: " + path);
             escribirError(
                     response,
                     request,
                     HttpStatus.UNAUTHORIZED,
-                    "Token inválido"
+                    "Token inválido o vacío"
             );
             return;
         }
 
-        //  MOCK: setear contexto de seguridad
+        // Setear contexto de seguridad MOCK
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
-                        "mock-user-id", // en JWT real: userId
+                        "mock-user-id",  // En JWT real: userId extraído del token
                         null,
-                        List.of() // en JWT real: roles
+                        List.of()        // En JWT real: roles extraídos del token
                 );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        logger.debug("✅ Token válido, usuario autenticado: mock-user-id");
 
         // Continuar flujo
         filterChain.doFilter(request, response);
@@ -87,27 +97,32 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
     /**
      * Define rutas públicas (sin JWT)
+     *
+     * IMPORTANTE: Mantener sincronizado con SecurityConfig
      */
-    private boolean esRutaPublica(String path) {
+    private boolean esRutaPublica(String path, String method) {
         return
-                // Swagger / OpenAPI
+                // ===== SWAGGER / OPENAPI =====
                 path.startsWith("/v3/api-docs") ||
                         path.startsWith("/swagger-ui") ||
                         path.startsWith("/swagger-ui.html") ||
 
-                        // Webhooks externos
+                        // ===== WEBHOOKS =====
                         path.startsWith("/api/webhooks") ||
 
-                        // Catálogo público
-                        path.equals("/api/productos") ||
-                        path.startsWith("/api/productos/") ||
+                        // ===== PRODUCTOS (GET públicos) =====
+                        (path.equals("/api/productos") && method.equals("GET")) ||
+                        (path.startsWith("/api/productos/") && method.equals("GET")) ||
 
-                        // Registro cliente
-                        path.equals("/api/clientes");
+                        // ===== REGISTRO CLIENTE (POST público) =====
+                        (path.equals("/api/v1/clientes") && method.equals("POST"));
     }
 
     /**
      * Validación JWT MOCK
+     *
+     * En local: solo verifica que el token no esté vacío
+     * En prod: se usa JwtAuthenticationFilter con validación real
      */
     private boolean validarToken(String token) {
         return token != null && !token.isBlank();
@@ -124,6 +139,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
         response.setStatus(status.value());
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
         String body = """
                 {
@@ -143,6 +159,4 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
         response.getWriter().write(body);
     }
-
-
 }

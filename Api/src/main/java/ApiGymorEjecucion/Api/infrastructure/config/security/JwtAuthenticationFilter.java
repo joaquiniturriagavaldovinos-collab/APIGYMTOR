@@ -1,6 +1,5 @@
 package ApiGymorEjecucion.Api.infrastructure.config.security;
 
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
@@ -26,6 +25,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Filtro de autenticación JWT REAL para producción
+ *
+ * Valida:
+ * - Firma del token
+ * - Expiración
+ * - Estructura correcta
+ *
+ * Extrae:
+ * - userId (subject)
+ * - roles (claim "roles")
+ */
 @Profile("prod")
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -48,22 +59,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
+        String method = request.getMethod();
 
-        if (esRutaPublica(path)) {
+        // Si es ruta pública, continuar sin validar token
+        if (esRutaPublica(path, method)) {
             filterChain.doFilter(request, response);
             return;
         }
 
+        // Rutas protegidas requieren token
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
-            escribirError(response, request, HttpStatus.UNAUTHORIZED, "Token no proporcionado");
+            escribirError(response, request, HttpStatus.UNAUTHORIZED,
+                    "Token no proporcionado");
             return;
         }
 
         String token = authHeader.substring(BEARER_PREFIX.length());
 
         try {
+            // Parsear y validar JWT
             Jws<Claims> jws = Jwts.parserBuilder()
                     .setSigningKey(signingKey)
                     .build()
@@ -71,8 +87,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             Claims claims = jws.getBody();
 
+            // Extraer userId del subject
             String userId = claims.getSubject();
 
+            // Extraer roles
             @SuppressWarnings("unchecked")
             List<String> roles = claims.get("roles", List.class);
 
@@ -83,6 +101,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .map(SimpleGrantedAuthority::new)
                             .collect(Collectors.toList());
 
+            // Setear contexto de seguridad
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             userId,
@@ -91,27 +110,43 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Continuar flujo
             filterChain.doFilter(request, response);
 
         } catch (JwtException ex) {
-            escribirError(response, request, HttpStatus.UNAUTHORIZED, "Token inválido o expirado");
+            // Token inválido, expirado o mal formado
+            escribirError(response, request, HttpStatus.UNAUTHORIZED,
+                    "Token inválido o expirado: " + ex.getMessage());
         }
     }
 
-    private boolean esRutaPublica(String path) {
+    /**
+     * Define rutas públicas (sin JWT)
+     *
+     * IMPORTANTE: Mantener sincronizado con SecurityConfig
+     */
+    private boolean esRutaPublica(String path, String method) {
         return
+                // ===== SWAGGER / OPENAPI =====
                 path.startsWith("/v3/api-docs") ||
                         path.startsWith("/swagger-ui") ||
                         path.startsWith("/swagger-ui.html") ||
 
+                        // ===== WEBHOOKS =====
                         path.startsWith("/api/webhooks") ||
 
-                        path.equals("/api/productos") ||
-                        path.startsWith("/api/productos/") ||
+                        // ===== PRODUCTOS (GET públicos) =====
+                        (path.equals("/api/productos") && method.equals("GET")) ||
+                        (path.startsWith("/api/productos/") && method.equals("GET")) ||
 
-                        path.equals("/api/clientes");
+                        // ===== REGISTRO CLIENTE (POST público) =====
+                        (path.equals("/api/v1/clientes") && method.equals("POST"));
     }
 
+    /**
+     * Escritura de error JSON
+     */
     private void escribirError(
             HttpServletResponse response,
             HttpServletRequest request,
@@ -120,6 +155,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         response.setStatus(status.value());
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
         String body = """
                 {
