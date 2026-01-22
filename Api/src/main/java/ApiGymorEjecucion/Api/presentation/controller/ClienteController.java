@@ -32,6 +32,8 @@ public class ClienteController {
     private final ActualizarClienteUseCase actualizarClienteUseCase;
     private final AgregarDireccionClienteUseCase agregarDireccionClienteUseCase;
     private final DesactivarClienteUseCase desactivarClienteUseCase;
+    private final ActivarClienteUseCase activarClienteUseCase; // Campo nuevo
+
 
     public ClienteController(
             RegistrarClienteUseCase registrarClienteUseCase,
@@ -40,7 +42,8 @@ public class ClienteController {
             ListarClientesUseCase listarClientesUseCase,
             ActualizarClienteUseCase actualizarClienteUseCase,
             AgregarDireccionClienteUseCase agregarDireccionClienteUseCase,
-            DesactivarClienteUseCase desactivarClienteUseCase) {
+            DesactivarClienteUseCase desactivarClienteUseCase,
+            ActivarClienteUseCase activarClienteUseCase) { // agregar
 
         this.registrarClienteUseCase = registrarClienteUseCase;
         this.buscarClientePorIdUseCase = buscarClientePorIdUseCase;
@@ -49,7 +52,10 @@ public class ClienteController {
         this.actualizarClienteUseCase = actualizarClienteUseCase;
         this.agregarDireccionClienteUseCase = agregarDireccionClienteUseCase;
         this.desactivarClienteUseCase = desactivarClienteUseCase;
+        this.activarClienteUseCase = activarClienteUseCase; // asignar
     }
+
+
 
     // -------------------------------------------------
     // REGISTRAR CLIENTE
@@ -212,6 +218,21 @@ public class ClienteController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+
+
+    //-------------------------
+     //Acticar cliente
+     //------------------------
+    @PutMapping("/{id}/activar")
+    public ResponseEntity<Void> activarCliente(
+            @PathVariable String id) {
+
+        activarClienteUseCase.ejecutar(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
 
     // -------------------------------------------------
     // DESACTIVAR CLIENTE
