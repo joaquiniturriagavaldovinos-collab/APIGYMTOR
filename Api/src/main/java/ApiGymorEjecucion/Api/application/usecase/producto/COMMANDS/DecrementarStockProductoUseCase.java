@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.application.usecase.producto;
+package ApiGymorEjecucion.Api.application.usecase.producto.COMMANDS;
 
 import ApiGymorEjecucion.Api.domain.model.producto.Producto;
 import ApiGymorEjecucion.Api.domain.repository.ProductoRepository;
@@ -6,16 +6,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Caso de Uso: Reservar Stock de Producto
- * Reserva stock para operaciones futuras (carrito, cotización)
+ * Caso de Uso: Decrementar Stock de Producto
+ * Reduce el stock (venta confirmada)
  * La validación de negocio está en el dominio
  */
 @Service
-public class ReservarStockProductoUseCase {
+public class DecrementarStockProductoUseCase {
 
     private final ProductoRepository productoRepository;
 
-    public ReservarStockProductoUseCase(ProductoRepository productoRepository) {
+    public DecrementarStockProductoUseCase(ProductoRepository productoRepository) {
         this.productoRepository = productoRepository;
     }
 
@@ -26,7 +26,7 @@ public class ReservarStockProductoUseCase {
                         "Producto no encontrado con ID: " + id));
 
         // La lógica de validación está en el dominio
-        producto.reservarStock(cantidad);
+        producto.decrementarStock(cantidad);
 
         return productoRepository.guardar(producto);
     }

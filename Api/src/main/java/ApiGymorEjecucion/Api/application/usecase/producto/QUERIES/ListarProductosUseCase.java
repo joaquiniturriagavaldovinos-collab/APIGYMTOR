@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.application.usecase.producto;
+package ApiGymorEjecucion.Api.application.usecase.producto.QUERIES;
 
 import ApiGymorEjecucion.Api.application.dto.response.producto.ProductoListResponse;
 import ApiGymorEjecucion.Api.domain.model.producto.Producto;
@@ -6,8 +6,6 @@ import ApiGymorEjecucion.Api.domain.model.producto.TipoProducto;
 import ApiGymorEjecucion.Api.domain.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,12 +30,12 @@ public class ListarProductosUseCase {
     /**
      * Lista todos los productos activos
      */
-    public List<ProductoListResponse> listarTodos() {
+    public List<Producto> listarTodos() {
         return productoRepository.buscarTodos().stream()
                 .filter(Producto::isActivo)
-                .map(this::mapearAResponse)
                 .collect(Collectors.toList());
     }
+
 
     /**
      * Lista productos por tipo

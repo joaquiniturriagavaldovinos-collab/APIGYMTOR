@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.application.usecase.producto;
+package ApiGymorEjecucion.Api.application.usecase.producto.COMMANDS;
 
 import ApiGymorEjecucion.Api.application.dto.response.producto.ActualizarStockResponse;
 import ApiGymorEjecucion.Api.domain.exception.StockInsuficienteException;

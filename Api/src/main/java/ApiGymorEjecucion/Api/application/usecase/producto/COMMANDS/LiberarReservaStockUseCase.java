@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.application.usecase.producto;
+package ApiGymorEjecucion.Api.application.usecase.producto.COMMANDS;
 
 import ApiGymorEjecucion.Api.domain.model.producto.Producto;
 import ApiGymorEjecucion.Api.domain.repository.ProductoRepository;
@@ -6,28 +6,30 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Caso de Uso: Activar Producto
- * Activa un producto previamente desactivado
- * La validación de negocio está en el dominio
+ * Caso de Uso: Liberar Reserva de Stock
+ * Libera stock previamente reservado (ej: cuando se cancela un carrito)
  */
 @Service
-public class ActivarProductoUseCase {
+public class LiberarReservaStockUseCase {
 
     private final ProductoRepository productoRepository;
 
-    public ActivarProductoUseCase(ProductoRepository productoRepository) {
+    public LiberarReservaStockUseCase(ProductoRepository productoRepository) {
         this.productoRepository = productoRepository;
     }
 
     @Transactional
-    public Producto ejecutar(String id) {
+    public Producto ejecutar(String id, int cantidad) {
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException(
+                    "La cantidad a liberar debe ser mayor a cero");
+        }
+
         Producto producto = productoRepository.buscarPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Producto no encontrado con ID: " + id));
 
-        // La lógica de validación está en el dominio
-        producto.activar();
-
+        producto.liberarReserva(cantidad);
         return productoRepository.guardar(producto);
     }
 }

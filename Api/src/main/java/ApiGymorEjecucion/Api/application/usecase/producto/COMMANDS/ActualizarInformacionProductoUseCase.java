@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.application.usecase.producto;
+package ApiGymorEjecucion.Api.application.usecase.producto.COMMANDS;
 
 import ApiGymorEjecucion.Api.domain.model.producto.Producto;
 import ApiGymorEjecucion.Api.domain.repository.ProductoRepository;
@@ -6,30 +6,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Caso de Uso: Liberar Reserva de Stock
- * Libera stock previamente reservado (ej: cuando se cancela un carrito)
+ * Caso de Uso: Actualizar Información de Producto
+ * Actualiza nombre y/o descripción del producto
  */
 @Service
-public class LiberarReservaStockUseCase {
+public class ActualizarInformacionProductoUseCase {
 
     private final ProductoRepository productoRepository;
 
-    public LiberarReservaStockUseCase(ProductoRepository productoRepository) {
+    public ActualizarInformacionProductoUseCase(ProductoRepository productoRepository) {
         this.productoRepository = productoRepository;
     }
 
     @Transactional
-    public Producto ejecutar(String id, int cantidad) {
-        if (cantidad <= 0) {
-            throw new IllegalArgumentException(
-                    "La cantidad a liberar debe ser mayor a cero");
-        }
-
+    public Producto ejecutar(String id, String nuevoNombre, String nuevaDescripcion) {
         Producto producto = productoRepository.buscarPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Producto no encontrado con ID: " + id));
 
-        producto.liberarReserva(cantidad);
+        producto.actualizarInformacion(nuevoNombre, nuevaDescripcion);
+
         return productoRepository.guardar(producto);
     }
 }

@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api.application.usecase.producto;
+package ApiGymorEjecucion.Api.application.usecase.producto.QUERIES;
 
 import ApiGymorEjecucion.Api.domain.model.producto.Producto;
 import ApiGymorEjecucion.Api.domain.repository.ProductoRepository;

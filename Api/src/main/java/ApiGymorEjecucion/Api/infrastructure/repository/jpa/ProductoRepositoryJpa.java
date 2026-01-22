@@ -17,10 +17,11 @@ import java.util.stream.Collectors;
 
 /**
  * Adaptador JPA para Producto (Arquitectura Hexagonal + DDD)
+ * Versión actualizada con optimizaciones
  */
 @Repository
-@Primary  // Prioridad sobre InMemory si ambos están activos
-@Profile("!test")  // Se activa en todos los perfiles EXCEPTO test
+@Primary
+@Profile("!test")
 public class ProductoRepositoryJpa implements ProductoRepository {
 
     private final ProductoJpaRepository jpaRepository;
@@ -64,9 +65,7 @@ public class ProductoRepositoryJpa implements ProductoRepository {
 
     @Override
     public List<Producto> buscarPorTipo(TipoProducto tipo) {
-        TipoProductoEntity tipoEntity =
-                TipoProductoEntity.valueOf(tipo.name());
-
+        TipoProductoEntity tipoEntity = TipoProductoEntity.valueOf(tipo.name());
         return jpaRepository.findByTipo(tipoEntity).stream()
                 .map(this::mapearADominio)
                 .collect(Collectors.toList());
@@ -81,12 +80,10 @@ public class ProductoRepositoryJpa implements ProductoRepository {
         return false;
     }
 
-
     @Override
     public boolean existePorCodigo(String codigo) {
         return jpaRepository.existsByCodigo(codigo);
     }
-
 
     @Override
     public long contar() {
@@ -98,6 +95,26 @@ public class ProductoRepositoryJpa implements ProductoRepository {
         return jpaRepository
                 .findByStock_CantidadDisponibleGreaterThan(0)
                 .stream()
+                .map(this::mapearADominio)
+                .collect(Collectors.toList());
+    }
+
+    // ===== MÉTODOS ADICIONALES (Opcionales) =====
+
+    /**
+     * Busca productos agotados usando query optimizada
+     */
+    public List<Producto> buscarAgotados() {
+        return jpaRepository.findProductosAgotados().stream()
+                .map(this::mapearADominio)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Busca productos con stock bajo usando query optimizada
+     */
+    public List<Producto> buscarConStockBajo() {
+        return jpaRepository.findProductosConStockBajo().stream()
                 .map(this::mapearADominio)
                 .collect(Collectors.toList());
     }
