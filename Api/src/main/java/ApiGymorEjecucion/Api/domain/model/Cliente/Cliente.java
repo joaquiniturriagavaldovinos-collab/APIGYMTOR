@@ -144,6 +144,30 @@ public class Cliente {
         return activo;
     }
 
+    public void actualizarDatosPersonales(String nombre, String apellido, String telefono) {
+
+        if (!this.activo) {
+            throw new IllegalStateException("No se puede modificar un cliente inactivo");
+        }
+
+        if (nombre == null || nombre.isBlank()) {
+            throw new IllegalArgumentException("El nombre no puede estar vacío");
+        }
+
+        if (apellido == null || apellido.isBlank()) {
+            throw new IllegalArgumentException("El apellido no puede estar vacío");
+        }
+
+        if (telefono == null || telefono.isBlank()) {
+            throw new IllegalArgumentException("El teléfono no puede estar vacío");
+        }
+
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.telefono = telefono;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

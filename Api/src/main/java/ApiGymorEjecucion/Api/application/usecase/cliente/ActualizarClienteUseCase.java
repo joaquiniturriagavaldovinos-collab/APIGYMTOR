@@ -17,33 +17,26 @@ public class ActualizarClienteUseCase {
         this.clienteRepository = clienteRepository;
     }
 
-    public ClienteResponse ejecutar(
-            String id, ActualizarClienteRequest request) {
+    public ClienteResponse ejecutar(String id, ActualizarClienteRequest request) {
 
-        // Validar
         validarRequest(request);
 
-        // Buscar cliente
         Cliente cliente = clienteRepository.buscarPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "No se encontró el cliente con ID: " + id
                 ));
 
-        // Actualizar información (solo campos permitidos)
-        if (request.getTelefono() != null && !request.getTelefono().isBlank()) {
-            // El dominio valida el formato
-            // cliente.actualizarTelefono(request.getTelefono());
-            // Por ahora asumimos que Cliente no tiene setters públicos
-            // En un diseño real, tendrías métodos como:
-            // cliente.cambiarTelefono(nuevoTelefono);
-        }
+        cliente.actualizarDatosPersonales(
+                request.getNombre(),
+                request.getApellido(),
+                request.getTelefono()
+        );
 
-        // Persistir
         Cliente actualizado = clienteRepository.guardar(cliente);
 
-        // Retornar
         return mapearAResponse(actualizado);
     }
+
 
     private void validarRequest(ActualizarClienteRequest request) {
         if (request == null) {
@@ -66,4 +59,6 @@ public class ActualizarClienteUseCase {
 
         return response;
     }
+
+
 }
