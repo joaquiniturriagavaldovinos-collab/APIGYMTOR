@@ -6,7 +6,8 @@ package ApiGymorEjecucion.Api.domain.model.pedido;
  */
 public enum TipoItem {
     PRODUCTO_FISICO("Producto Físico"),
-    SERVICIO("Servicio");
+    SERVICIO("Servicio"),
+    SUPLEMENTO("Suplemento");  // <-- nuevo tipo
 
     private final String descripcion;
 

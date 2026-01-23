@@ -99,6 +99,16 @@ public class ProductoRepositoryJpa implements ProductoRepository {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Producto obtenerPorId(String id) {
+        return jpaRepository.findById(id)       // Optional<ProductoEntity>
+                .map(this::mapearADominio)      // mapear a Producto dominio
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Producto no encontrado con ID: " + id
+                ));
+    }
+
+
     // ===== MÉTODOS ADICIONALES (Opcionales) =====
 
     /**

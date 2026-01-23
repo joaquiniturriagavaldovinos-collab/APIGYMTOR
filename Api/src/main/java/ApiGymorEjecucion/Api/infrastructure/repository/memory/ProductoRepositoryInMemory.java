@@ -107,4 +107,18 @@ public class ProductoRepositoryInMemory implements ProductoRepository {
     public void limpiar() {
         productos.clear();
     }
+
+    @Override
+    public Producto obtenerPorId(String id) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("El ID del producto no puede ser nulo o vacío");
+        }
+        Producto producto = productos.get(id);
+        if (producto == null) {
+            throw new IllegalArgumentException("Producto no encontrado con ID: " + id);
+        }
+        return producto;
+    }
+
+
 }
