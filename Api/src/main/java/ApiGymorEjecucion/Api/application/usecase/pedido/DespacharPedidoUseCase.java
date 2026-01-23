@@ -1,63 +1,82 @@
 package ApiGymorEjecucion.Api.application.usecase.pedido;
 
-
 import ApiGymorEjecucion.Api.application.dto.request.pedido.DespacharPedidoRequest;
 import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
 import ApiGymorEjecucion.Api.application.mapper.PedidoMapper;
 import ApiGymorEjecucion.Api.domain.exception.PedidoNoEncontradoException;
+import ApiGymorEjecucion.Api.domain.model.Despacho.*;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
+import ApiGymorEjecucion.Api.domain.repository.DespachoRepository;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 /**
  * CU5: Despachar Pedido
  *
  * Transición: PREPARING -> DISPATCHED
- * Genera guía de despacho y entrega al transportista.
+ * Crea el despacho y asigna guía/transportista
  */
 @Service
 public class DespacharPedidoUseCase {
 
     private final PedidoRepository pedidoRepository;
+    private final DespachoRepository despachoRepository;
 
-    public DespacharPedidoUseCase(PedidoRepository pedidoRepository) {
+    public DespacharPedidoUseCase(
+            PedidoRepository pedidoRepository,
+            DespachoRepository despachoRepository
+    ) {
         this.pedidoRepository = pedidoRepository;
+        this.despachoRepository = despachoRepository;
     }
 
-    /**
-     * Despacha un pedido preparado
-     *
-     * @param request Datos de despacho (guía, transportista)
-     * @return Pedido actualizado en estado DISPATCHED
-     */
+    @Transactional
     public PedidoResponse ejecutar(DespacharPedidoRequest request) {
-        // Validar request
+        // Validar
         validarRequest(request);
 
         // Buscar pedido
         Pedido pedido = pedidoRepository.buscarPorId(request.getPedidoId())
                 .orElseThrow(() -> new PedidoNoEncontradoException(request.getPedidoId()));
 
-        // Validar que pueda despacharse
-        if (!pedido.puedeDespacharse()) {
-            throw new IllegalStateException(
-                    String.format("El pedido en estado %s no puede despacharse",
-                            pedido.getEstado().getDescripcion())
-            );
-        }
+        // Crear guía de despacho
+        GuiaDespacho guia = GuiaDespacho.crear(
+                request.getNumeroGuia(),
+                request.getUrlTracking()
+        );
 
-        // El dominio valida la transición
-        pedido.despachar(request.getGuiaDespacho());
+        // Despachar pedido (transición de estado)
+        pedido.despachar(guia.getNumero());
 
-        // Persistir cambio
-        Pedido pedidoActualizado = pedidoRepository.guardar(pedido);
+        // Crear transportista
+        Transportista transportista = Transportista.crear(
+                request.getNombreTransportista(),
+                request.getCodigoTransportista(),
+                request.getTelefonoTransportista()
+        );
 
-        // Aquí se integraría con:
-        // - API del transportista (registrar envío)
-        // - Sistema de notificaciones (avisar al cliente)
-        // - Sistema de tracking
+        // Crear dirección de entrega
+        DireccionEntrega direccion = new DireccionEntrega(
+                request.getDireccionEntrega()
+        );
 
-        return PedidoMapper.toResponse(pedidoActualizado);
+        // Crear despacho
+        Despacho despacho = Despacho.crear(
+                "DESP-" + System.currentTimeMillis(),
+                pedido.getId()
+        );
+
+        // Despachar con datos del transportista
+        despacho.despachar(guia, transportista);
+
+        // Guardar ambos
+        pedidoRepository.guardar(pedido);
+        despachoRepository.guardar(despacho);
+
+        return PedidoMapper.toResponse(pedido);
     }
 
     private void validarRequest(DespacharPedidoRequest request) {
@@ -67,8 +86,17 @@ public class DespacharPedidoUseCase {
         if (request.getPedidoId() == null || request.getPedidoId().isBlank()) {
             throw new IllegalArgumentException("El ID del pedido es requerido");
         }
-        if (request.getGuiaDespacho() == null || request.getGuiaDespacho().isBlank()) {
-            throw new IllegalArgumentException("La guía de despacho es requerida");
+        if (request.getNumeroGuia() == null || request.getNumeroGuia().isBlank()) {
+            throw new IllegalArgumentException("El número de guía es requerido");
+        }
+        if (request.getNombreTransportista() == null || request.getNombreTransportista().isBlank()) {
+            throw new IllegalArgumentException("El nombre del transportista es requerido");
+        }
+        if (request.getCodigoTransportista() == null || request.getCodigoTransportista().isBlank()) {
+            throw new IllegalArgumentException("El código del transportista es requerido");
+        }
+        if (request.getDireccionEntrega() == null || request.getDireccionEntrega().isBlank()) {
+            throw new IllegalArgumentException("La dirección de entrega es requerida");
         }
     }
 }

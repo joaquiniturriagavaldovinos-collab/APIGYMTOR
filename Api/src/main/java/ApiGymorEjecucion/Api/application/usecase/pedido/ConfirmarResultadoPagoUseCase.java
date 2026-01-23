@@ -8,6 +8,7 @@ import ApiGymorEjecucion.Api.domain.exception.PedidoNoEncontradoException;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * CU3: Confirmar Resultado de Pago (Webhook)
@@ -33,6 +34,8 @@ public class ConfirmarResultadoPagoUseCase {
      * @param request Datos de confirmación del pago
      * @return Pedido actualizado (PAID o FAILED)
      */
+    @Transactional
+
     public PedidoResponse ejecutar(ConfirmarPagoRequest request) {
         // Validar request
         validarRequest(request);

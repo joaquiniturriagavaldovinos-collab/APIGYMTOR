@@ -6,6 +6,7 @@ import ApiGymorEjecucion.Api.domain.exception.PedidoNoEncontradoException;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * CU6: Confirmar Entrega
@@ -28,6 +29,8 @@ public class ConfirmarEntregaUseCase {
      * @param pedidoId ID del pedido
      * @return Pedido en estado final DELIVERED
      */
+    @Transactional
+
     public PedidoResponse ejecutar(String pedidoId) {
         // Validar input
         if (pedidoId == null || pedidoId.isBlank()) {

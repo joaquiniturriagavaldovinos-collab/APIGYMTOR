@@ -6,6 +6,7 @@ import ApiGymorEjecucion.Api.domain.exception.PedidoNoEncontradoException;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * CU2: Iniciar Pago de Pedido
@@ -28,6 +29,8 @@ public class IniciarPagoPedidoUseCase {
      * @param pedidoId ID del pedido
      * @return Pedido actualizado en estado PAYMENT_PENDING
      */
+
+    @Transactional
     public PedidoResponse ejecutar(String pedidoId) {
         // Validar input
         if (pedidoId == null || pedidoId.isBlank()) {

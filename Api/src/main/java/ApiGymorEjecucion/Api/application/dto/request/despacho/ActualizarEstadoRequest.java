@@ -1,46 +1,28 @@
 package ApiGymorEjecucion.Api.application.dto.request.despacho;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.Future;
 
 import java.time.LocalDateTime;
 
 public class ActualizarEstadoRequest {
 
-    /**
-     * Tipo de actualización permitida:
-     * - ENTREGA_CONFIRMADA
-     * - FECHA_ESTIMADA
-     * - OBSERVACIONES
-     */
     @NotBlank(message = "El tipo de actualización es obligatorio")
-    @Pattern(
-            regexp = "ENTREGA_CONFIRMADA|FECHA_ESTIMADA|OBSERVACIONES",
-            message = "El tipo de actualización debe ser ENTREGA_CONFIRMADA, FECHA_ESTIMADA u OBSERVACIONES"
-    )
-    private String tipoActualizacion;
+    private String tipoActualizacion; // ENTREGA_CONFIRMADA, FECHA_ESTIMADA, OBSERVACIONES
 
-    /**
-     * Fecha estimada de entrega.
-     * Obligatoria solo cuando tipoActualizacion = FECHA_ESTIMADA
-     */
-    @Future(message = "La fecha estimada de entrega debe ser futura")
     private LocalDateTime fechaEntregaEstimada;
-
-    /**
-     * Observaciones del despacho
-     */
-    @Size(
-            max = 500,
-            message = "Las observaciones no pueden superar los 500 caracteres"
-    )
     private String observaciones;
 
-    // Getters & Setters
+    // Constructors
+    public ActualizarEstadoRequest() {
+    }
 
+    public ActualizarEstadoRequest(String tipoActualizacion, LocalDateTime fechaEntregaEstimada, String observaciones) {
+        this.tipoActualizacion = tipoActualizacion;
+        this.fechaEntregaEstimada = fechaEntregaEstimada;
+        this.observaciones = observaciones;
+    }
+
+    // Getters y Setters
     public String getTipoActualizacion() {
         return tipoActualizacion;
     }

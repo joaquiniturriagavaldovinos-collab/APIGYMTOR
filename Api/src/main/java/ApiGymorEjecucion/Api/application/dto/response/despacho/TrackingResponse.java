@@ -1,5 +1,7 @@
 package ApiGymorEjecucion.Api.application.dto.response.despacho;
 
+import java.time.LocalDateTime;
+
 public class TrackingResponse {
 
     private String pedidoId;
@@ -7,9 +9,10 @@ public class TrackingResponse {
     private String urlTracking;
     private String estadoActual;
     private String descripcionEstado;
-    private java.time.LocalDateTime fechaUltimaActualizacion;
+    private LocalDateTime fechaUltimaActualizacion;
     private boolean estaEntregado;
 
+    // Getters y Setters
     public String getPedidoId() {
         return pedidoId;
     }
@@ -50,12 +53,11 @@ public class TrackingResponse {
         this.descripcionEstado = descripcionEstado;
     }
 
-    public java.time.LocalDateTime getFechaUltimaActualizacion() {
+    public LocalDateTime getFechaUltimaActualizacion() {
         return fechaUltimaActualizacion;
     }
 
-    public void setFechaUltimaActualizacion(
-            java.time.LocalDateTime fechaUltimaActualizacion) {
+    public void setFechaUltimaActualizacion(LocalDateTime fechaUltimaActualizacion) {
         this.fechaUltimaActualizacion = fechaUltimaActualizacion;
     }
 

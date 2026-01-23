@@ -8,6 +8,7 @@ import ApiGymorEjecucion.Api.domain.exception.PedidoNoEncontradoException;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Caso de uso: Cancelar Pedido
@@ -34,6 +35,8 @@ public class CancelarPedidoUseCase {
      * @param motivo Razón de la cancelación
      * @return Pedido cancelado
      */
+    @Transactional
+
     public PedidoResponse ejecutar(String pedidoId, String motivo) {
         // Validar inputs
         if (pedidoId == null || pedidoId.isBlank()) {

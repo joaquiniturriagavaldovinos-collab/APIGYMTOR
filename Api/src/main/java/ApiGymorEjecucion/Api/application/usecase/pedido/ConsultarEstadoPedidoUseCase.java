@@ -6,6 +6,7 @@ import ApiGymorEjecucion.Api.domain.exception.PedidoNoEncontradoException;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Caso de uso: Consultar Estado de Pedido
@@ -27,6 +28,7 @@ public class ConsultarEstadoPedidoUseCase {
      * @param pedidoId ID del pedido a consultar
      * @return Información completa del pedido
      */
+    @Transactional(readOnly = true)
     public PedidoResponse ejecutar(String pedidoId) {
         // Validar input
         if (pedidoId == null || pedidoId.isBlank()) {

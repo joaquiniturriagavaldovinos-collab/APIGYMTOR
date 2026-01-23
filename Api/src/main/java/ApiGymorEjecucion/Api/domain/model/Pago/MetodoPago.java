@@ -38,4 +38,16 @@ public enum MetodoPago {
     public boolean esInstantaneo() {
         return this != TRANSFERENCIA_BANCARIA && this != EFECTIVO;
     }
+
+
+    public static MetodoPago fromString(String value) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("El método de pago es obligatorio");
+        }
+        try {
+            return MetodoPago.valueOf(value.toUpperCase()); // asegura mayúsculas
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Método de pago inválido: " + value);
+        }
+    }
 }
