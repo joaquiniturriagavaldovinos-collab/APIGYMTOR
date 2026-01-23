@@ -40,6 +40,10 @@ public class Cliente {
     public static Cliente crear(String id, String nombre, String apellido,
                                 String email, String telefono, String rut,
                                 TipoCliente tipo) {
+
+        if (id == null || id.isBlank()) {
+            id = "CLI-" + System.currentTimeMillis();
+        }
         validarDatos(id, nombre, apellido, email, rut);
         return new Cliente(id, nombre, apellido, email, telefono, rut, tipo);
     }

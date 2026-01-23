@@ -26,6 +26,8 @@ public class CrearProductoUseCase {
     public Producto ejecutar(String codigo, String nombre, String descripcion,
                              TipoProducto tipo, BigDecimal precio) {
 
+
+
         // Validar que el código no exista
         if (productoRepository.existePorCodigo(codigo)) {
             throw new IllegalArgumentException(

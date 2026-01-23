@@ -12,7 +12,10 @@ import java.util.Optional;
  */
 public interface ProductoRepository {
 
+
+    Producto obtenerPorId(String id);
     /**
+     *
      * Guarda o actualiza un producto
      */
     Producto guardar(Producto producto);

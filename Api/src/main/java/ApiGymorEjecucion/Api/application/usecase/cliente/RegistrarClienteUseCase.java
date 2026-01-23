@@ -30,6 +30,9 @@ public class RegistrarClienteUseCase {
      * @return Cliente registrado
      */
     public ClienteResponse ejecutar(RegistrarClienteRequest request) {
+
+
+
         // Validar request
         validarRequest(request);
 
@@ -49,8 +52,9 @@ public class RegistrarClienteUseCase {
 
         // Crear cliente en dominio
         TipoCliente tipo = TipoCliente.valueOf(request.getTipo());
+        
         Cliente cliente = Cliente.crear(
-                generarIdCliente(),
+                null,
                 request.getNombre(),
                 request.getApellido(),
                 request.getEmail(),
@@ -102,10 +106,6 @@ public class RegistrarClienteUseCase {
         }
     }
 
-    private String generarIdCliente() {
-        // En producción esto podría ser UUID o secuencia de BD
-        return "CLI-" + System.currentTimeMillis();
-    }
 
     private DireccionEntrega crearDireccionDesdeRequest(DireccionRequest request) {
         return DireccionEntrega.crear(

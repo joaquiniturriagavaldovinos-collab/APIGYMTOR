@@ -42,6 +42,9 @@ public class Producto {
      */
     public static Producto crear(String id, String codigo, String nombre,
                                  String descripcion, TipoProducto tipo, BigDecimal precio) {
+        if(id == null || id.isBlank()){
+            id = "PROD" + System.currentTimeMillis();
+        }
         validarDatosCreacion(id, codigo, nombre, tipo, precio);
         return new Producto(id, codigo, nombre, descripcion, tipo, precio);
     }

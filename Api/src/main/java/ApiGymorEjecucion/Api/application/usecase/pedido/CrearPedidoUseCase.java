@@ -8,9 +8,11 @@ import ApiGymorEjecucion.Api.application.mapper.PedidoMapper;
 import ApiGymorEjecucion.Api.domain.model.pedido.ItemPedido;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
+import ApiGymorEjecucion.Api.domain.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * CU1: Crear Pedido
@@ -22,10 +24,14 @@ import java.util.List;
 public class CrearPedidoUseCase {
 
     private final PedidoRepository pedidoRepository;
+    private final ProductoRepository productoRepository;
 
-    public CrearPedidoUseCase(PedidoRepository pedidoRepository) {
+    public CrearPedidoUseCase(PedidoRepository pedidoRepository,
+                              ProductoRepository productoRepository) {
         this.pedidoRepository = pedidoRepository;
+        this.productoRepository = productoRepository;
     }
+
 
     /**
      * Ejecuta la creación del pedido
@@ -34,6 +40,11 @@ public class CrearPedidoUseCase {
      * @return Pedido creado con estado CREATED
      */
     public PedidoResponse ejecutar(CrearPedidoRequest request) {
+
+
+        if(request.getPedidoId() == null || request.getPedidoId().isEmpty()){
+            request.setPedidoId("PED-"+ System.currentTimeMillis());
+        }
         // Validar request
         validarRequest(request);
 
@@ -45,7 +56,8 @@ public class CrearPedidoUseCase {
         }
 
         // Convertir items del request a dominio
-        List<ItemPedido> items = PedidoMapper.toItemsDomain(request.getItems());
+        List<ItemPedido> items = PedidoMapper.toItemsDomain(request.getItems(), productoRepository);
+
 
         // Crear pedido en dominio (estado CREATED automático)
         Pedido pedido = Pedido.crear(
