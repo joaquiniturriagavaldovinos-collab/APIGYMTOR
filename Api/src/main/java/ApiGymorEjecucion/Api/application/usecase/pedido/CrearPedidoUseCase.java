@@ -3,6 +3,7 @@ package ApiGymorEjecucion.Api.application.usecase.pedido;
 
 
 import ApiGymorEjecucion.Api.application.dto.request.pedido.CrearPedidoRequest;
+import ApiGymorEjecucion.Api.application.dto.request.pedido.ItemPedidoRequest;
 import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
 import ApiGymorEjecucion.Api.application.mapper.PedidoMapper;
 import ApiGymorEjecucion.Api.domain.model.pedido.ItemPedido;
@@ -11,6 +12,7 @@ import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
 import ApiGymorEjecucion.Api.domain.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,50 +43,66 @@ public class CrearPedidoUseCase {
      */
     public PedidoResponse ejecutar(CrearPedidoRequest request) {
 
-
-        if(request.getPedidoId() == null || request.getPedidoId().isEmpty()){
-            request.setPedidoId("PED-"+ System.currentTimeMillis());
+        // 1. Generar ID si no viene
+        String pedidoId = request.getPedidoId();
+        if (pedidoId == null || pedidoId.isBlank()) {
+            pedidoId = "PED-" + System.currentTimeMillis();
         }
-        // Validar request
-        validarRequest(request);
 
-        // Verificar que no exista pedido con ese ID
-        if (pedidoRepository.existe(request.getPedidoId())) {
+        // 3. Verificar existencia
+        if (pedidoRepository.existe(pedidoId)) {
             throw new IllegalArgumentException(
-                    "Ya existe un pedido con el ID: " + request.getPedidoId()
+                    "Ya existe un pedido con el ID: " + pedidoId
             );
         }
 
-        // Convertir items del request a dominio
-        List<ItemPedido> items = PedidoMapper.toItemsDomain(request.getItems(), productoRepository);
+        // 4. Mapear items a dominio
+        List<ItemPedido> items = PedidoMapper.toItemsDomain(
+                request.getItems(),
+                productoRepository
+        );
 
-
-        // Crear pedido en dominio (estado CREATED automático)
+        // 5. Crear pedido (el dominio calcula el total)
         Pedido pedido = Pedido.crear(
-                request.getPedidoId(),
+                pedidoId,
                 request.getClienteId(),
                 items
         );
 
-        // Persistir
+        // 6. Persistir
         Pedido pedidoGuardado = pedidoRepository.guardar(pedido);
 
-        // Retornar response
+        // 7. Retornar response
         return PedidoMapper.toResponse(pedidoGuardado);
     }
+
 
     private void validarRequest(CrearPedidoRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("La solicitud no puede ser nula");
         }
-        if (request.getPedidoId() == null || request.getPedidoId().isBlank()) {
-            throw new IllegalArgumentException("El ID del pedido es requerido");
-        }
+
+        // Solo valida lo que realmente es obligatorio
         if (request.getClienteId() == null || request.getClienteId().isBlank()) {
             throw new IllegalArgumentException("El ID del cliente es requerido");
         }
+
         if (request.getItems() == null || request.getItems().isEmpty()) {
-            throw new IllegalArgumentException("El pedido debe tener al menos un item");
+            throw new IllegalArgumentException("El pedido debe tener al menos un ítem");
+        }
+
+        // Validar cada ítem
+        for (ItemPedidoRequest item : request.getItems()) {
+            if (item.getProductoId() == null || item.getProductoId().isBlank()) {
+                throw new IllegalArgumentException("El ID del producto es requerido");
+            }
+            if (item.getCantidad() <= 0) {
+                throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
+            }
+            if (item.getPrecioUnitario() == null ||
+                    item.getPrecioUnitario().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("El precio unitario debe ser mayor a 0");
+            }
         }
     }
 }

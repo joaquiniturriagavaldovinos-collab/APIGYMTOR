@@ -1,24 +1,47 @@
 package ApiGymorEjecucion.Api.application.dto.response.pago;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PagoResponse {
+
+    // Identificadores
     private String id;
     private String pedidoId;
+
+    // Monto y método
     private BigDecimal monto;
     private String metodoPago;
     private String metodoPagoDescripcion;
+
+    // Estado
     private String estado;
     private String estadoDescripcion;
+    private boolean esExitoso;
+    private boolean estaFinalizado;
+    private boolean requiereAccionCliente; // Nuevo
+
+    // Referencias externas
     private String referenciaPasarela;
     private String codigoAutorizacion;
     private String motivoRechazo;
+
+    // URLs útiles
+    private String urlPago; // Para redirigir al cliente
+    private String urlComprobante; // PDF del comprobante
+
+    // Fechas
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaProcesamiento;
     private LocalDateTime fechaConfirmacion;
-    private boolean esExitoso;
-    private boolean estaFinalizado;
+    private LocalDateTime fechaExpiracion;
+
+    // Metadata
+    private String mensajeCliente;
+    private String siguienteAccion;
 
     // Getters y Setters
     public String getId() { return id; }
@@ -46,6 +69,19 @@ public class PagoResponse {
         this.estadoDescripcion = estadoDescripcion;
     }
 
+    public boolean isEsExitoso() { return esExitoso; }
+    public void setEsExitoso(boolean esExitoso) { this.esExitoso = esExitoso; }
+
+    public boolean isEstaFinalizado() { return estaFinalizado; }
+    public void setEstaFinalizado(boolean estaFinalizado) {
+        this.estaFinalizado = estaFinalizado;
+    }
+
+    public boolean isRequiereAccionCliente() { return requiereAccionCliente; }
+    public void setRequiereAccionCliente(boolean requiereAccionCliente) {
+        this.requiereAccionCliente = requiereAccionCliente;
+    }
+
     public String getReferenciaPasarela() { return referenciaPasarela; }
     public void setReferenciaPasarela(String referenciaPasarela) {
         this.referenciaPasarela = referenciaPasarela;
@@ -57,10 +93,22 @@ public class PagoResponse {
     }
 
     public String getMotivoRechazo() { return motivoRechazo; }
-    public void setMotivoRechazo(String motivoRechazo) { this.motivoRechazo = motivoRechazo; }
+    public void setMotivoRechazo(String motivoRechazo) {
+        this.motivoRechazo = motivoRechazo;
+    }
+
+    public String getUrlPago() { return urlPago; }
+    public void setUrlPago(String urlPago) { this.urlPago = urlPago; }
+
+    public String getUrlComprobante() { return urlComprobante; }
+    public void setUrlComprobante(String urlComprobante) {
+        this.urlComprobante = urlComprobante;
+    }
 
     public LocalDateTime getFechaCreacion() { return fechaCreacion; }
-    public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
 
     public LocalDateTime getFechaProcesamiento() { return fechaProcesamiento; }
     public void setFechaProcesamiento(LocalDateTime fechaProcesamiento) {
@@ -72,9 +120,18 @@ public class PagoResponse {
         this.fechaConfirmacion = fechaConfirmacion;
     }
 
-    public boolean isEsExitoso() { return esExitoso; }
-    public void setEsExitoso(boolean esExitoso) { this.esExitoso = esExitoso; }
+    public LocalDateTime getFechaExpiracion() { return fechaExpiracion; }
+    public void setFechaExpiracion(LocalDateTime fechaExpiracion) {
+        this.fechaExpiracion = fechaExpiracion;
+    }
 
-    public boolean isEstaFinalizado() { return estaFinalizado; }
-    public void setEstaFinalizado(boolean estaFinalizado) { this.estaFinalizado = estaFinalizado; }
+    public String getMensajeCliente() { return mensajeCliente; }
+    public void setMensajeCliente(String mensajeCliente) {
+        this.mensajeCliente = mensajeCliente;
+    }
+
+    public String getSiguienteAccion() { return siguienteAccion; }
+    public void setSiguienteAccion(String siguienteAccion) {
+        this.siguienteAccion = siguienteAccion;
+    }
 }

@@ -24,22 +24,56 @@ public class Pago {
     private LocalDateTime fechaProcesamiento;
     private LocalDateTime fechaConfirmacion;
 
+
+    // Constructor 1: Para lógica de negocio (crear nuevos pagos)
     private Pago(String id, String pedidoId, BigDecimal monto, MetodoPago metodoPago) {
         this.id = id;
         this.pedidoId = pedidoId;
         this.monto = monto;
         this.metodoPago = metodoPago;
-        this.estado = EstadoPago.PENDIENTE;
-        this.fechaCreacion = LocalDateTime.now();
+        this.estado = EstadoPago.PENDIENTE; // ← Siempre inicia en PENDIENTE
+        this.fechaCreacion = LocalDateTime.now(); // ← Fecha actual
     }
 
-    /**
-     * Factory method: Crea un nuevo pago en estado PENDIENTE
-     */
+    // Constructor 2: Para reconstrucción desde BD
+    private Pago(String id, String pedidoId, BigDecimal monto, MetodoPago metodoPago,
+                 EstadoPago estado, String referenciaPasarela, String codigoAutorizacion,
+                 String motivoRechazo, LocalDateTime fechaCreacion,
+                 LocalDateTime fechaProcesamiento, LocalDateTime fechaConfirmacion) {
+        this.id = id;
+        this.pedidoId = pedidoId;
+        this.monto = monto;
+        this.metodoPago = metodoPago;
+        this.estado = estado; // ← Estado persistido
+        this.referenciaPasarela = referenciaPasarela;
+        this.codigoAutorizacion = codigoAutorizacion;
+        this.motivoRechazo = motivoRechazo;
+        this.fechaCreacion = fechaCreacion; // ← Fecha persistida
+        this.fechaProcesamiento = fechaProcesamiento;
+        this.fechaConfirmacion = fechaConfirmacion;
+    }
+
     public static Pago crear(String id, String pedidoId, BigDecimal monto, MetodoPago metodoPago) {
         validarDatosCreacion(id, pedidoId, monto, metodoPago);
         return new Pago(id, pedidoId, monto, metodoPago);
     }
+
+    /**
+     * Factory method: Reconstruye un pago desde la persistencia
+     */
+    public static Pago reconstruir(
+            String id, String pedidoId, BigDecimal monto, MetodoPago metodoPago,
+            EstadoPago estado, String referenciaPasarela, String codigoAutorizacion,
+            String motivoRechazo, LocalDateTime fechaCreacion,
+            LocalDateTime fechaProcesamiento, LocalDateTime fechaConfirmacion) {
+
+        return new Pago(id, pedidoId, monto, metodoPago, estado,
+                referenciaPasarela, codigoAutorizacion, motivoRechazo,
+                fechaCreacion, fechaProcesamiento, fechaConfirmacion);
+    }
+    /**
+     * Factory method: Crea un nuevo pago en estado PENDIENTE
+     */
 
     private static void validarDatosCreacion(String id, String pedidoId,
                                              BigDecimal monto, MetodoPago metodoPago) {

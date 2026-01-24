@@ -16,6 +16,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +39,7 @@ public class PagoController {
     private final ListarPagosUseCase listarPagosUseCase;
     private final ReembolsarPagoUseCase reembolsarPagoUseCase;
 
+
     public PagoController(
             IniciarPagoUseCase iniciarPagoUseCase,
             IniciarPagoPedidoUseCase iniciarPagoPedidoUseCase,
@@ -51,34 +54,6 @@ public class PagoController {
         this.consultarPagosPorPedidoUseCase = consultarPagosPorPedidoUseCase;
         this.listarPagosUseCase = listarPagosUseCase;
         this.reembolsarPagoUseCase = reembolsarPagoUseCase;
-    }
-
-    // -----------------------------------------
-    // INICIAR PAGO DE PEDIDO
-    // -----------------------------------------
-    @Operation(summary = "Iniciar pago de pedido", description = "Crea un pago y actualiza el pedido a PAYMENT_PENDING")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Pago iniciado correctamente", content = @Content(schema = @Schema(implementation = PagoResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content)
-    })
-    @PostMapping("/iniciar")
-    public ResponseEntity<PagoResponse> iniciarPago(
-            @RequestBody IniciarPagoRequest request
-    ) {
-        // Convertir string a enum de manera segura
-        MetodoPago metodoPago = MetodoPago.fromString(request.getMetodoPago());
-
-        // Crear pago
-        PagoResponse response = iniciarPagoUseCase.ejecutar(
-                request.getPedidoId(),
-                request.getMonto(),
-                metodoPago
-        );
-
-        // Actualizar estado del pedido
-        iniciarPagoPedidoUseCase.ejecutar(request.getPedidoId());
-
-        return ResponseEntity.ok(response);
     }
 
     // -----------------------------------------

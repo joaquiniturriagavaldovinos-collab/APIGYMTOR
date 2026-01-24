@@ -102,22 +102,18 @@ public class PagoRepositoryJpa implements PagoRepository {
     }
 
     private Pago mapToDomain(PagoEntity entity) {
-        Pago pago = Pago.crear(
+        return Pago.reconstruir(
                 entity.getId(),
                 entity.getPedidoId(),
                 entity.getMonto(),
-                entity.getMetodoPago()
+                entity.getMetodoPago(),
+                entity.getEstado(),
+                entity.getReferenciaPasarela(),
+                entity.getCodigoAutorizacion(),
+                entity.getMotivoRechazo(),
+                entity.getFechaCreacion(),
+                entity.getFechaProcesamiento(),
+                entity.getFechaConfirmacion()
         );
-
-        // reconstrucción de estado
-        switch (entity.getEstado()) {
-            case PROCESANDO -> pago.iniciarProcesamiento(entity.getReferenciaPasarela());
-            case EXITOSO -> pago.confirmarExitoso(entity.getCodigoAutorizacion());
-            case RECHAZADO -> pago.marcarRechazado(entity.getMotivoRechazo());
-            case CANCELADO -> pago.cancelar(entity.getMotivoRechazo());
-            case REEMBOLSADO -> pago.reembolsar();
-        }
-
-        return pago;
     }
 }

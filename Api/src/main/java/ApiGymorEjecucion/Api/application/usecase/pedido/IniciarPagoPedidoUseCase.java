@@ -1,8 +1,11 @@
 package ApiGymorEjecucion.Api.application.usecase.pedido;
 
 import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
+import ApiGymorEjecucion.Api.application.mapper.IniciarPagoMapper;
 import ApiGymorEjecucion.Api.application.mapper.PedidoMapper;
 import ApiGymorEjecucion.Api.domain.exception.PedidoNoEncontradoException;
+import ApiGymorEjecucion.Api.domain.model.Pago.MetodoPago;
+import ApiGymorEjecucion.Api.domain.model.Pago.Pago;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
@@ -47,9 +50,15 @@ public class IniciarPagoPedidoUseCase {
         // Persistir cambio
         Pedido pedidoActualizado = pedidoRepository.guardar(pedido);
 
-        // Aquí se integraría con la pasarela de pago externa
-        // Por ahora solo cambiamos el estado
+        // Crear el registro de pago
+        MetodoPago metodoPago = MetodoPago.fromString(metodoPagoStr);
+        Pago pago = iniciarPagoUseCase.ejecutarYRetornarDominio( // Nuevo método
+                pedidoId,
+                pedido.getTotal(),
+                metodoPago
+        );
 
-        return PedidoMapper.toResponse(pedidoActualizado);
+        // Retornar response combinado
+        return IniciarPagoMapper.toResponse(pedidoActualizado, pago);
     }
 }

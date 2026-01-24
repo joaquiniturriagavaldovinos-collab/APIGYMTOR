@@ -30,6 +30,7 @@ public class Pedido {
     private LocalDateTime fechaActualizacion;
     private String referenciaPago;
     private String guiaDespacho;
+    private BigDecimal total;
 
     // Constructor privado - usar factory method
     private Pedido(String id, String clienteId, List<ItemPedido> items) {
@@ -41,7 +42,8 @@ public class Pedido {
         this.fechaCreacion = LocalDateTime.now();
         this.fechaActualizacion = LocalDateTime.now();
 
-        // Registrar estado inicial
+        this.total = calcularTotal();
+
         this.historialEstados.add(
                 TransicionEstado.crear(null, EstadoPedido.CREATED, "Pedido creado")
         );
@@ -241,6 +243,10 @@ public class Pedido {
         return estado;
     }
 
+
+    public BigDecimal getTotal() {
+        return total;
+    }
     /**
      * Retorna copia inmutable de los items
      */
@@ -313,7 +319,10 @@ public class Pedido {
 
     @Override
     public String toString() {
-        return String.format("Pedido{id='%s', estado=%s, total=%s, items=%d}",
-                id, estado, calcularTotal(), items.size());
+        return String.format(
+                "Pedido{id='%s', estado=%s, total=%s, items=%d}",
+                id, estado, total, items.size()
+        );
     }
+
 }

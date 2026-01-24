@@ -29,8 +29,6 @@ public class IniciarPagoRequest {
 
     @NotNull(message = "El monto es obligatorio")
     @DecimalMin(value = "0.01", message = "El monto debe ser mayor a cero")
-    private BigDecimal monto;
-
     // Constructors
 
     public IniciarPagoRequest() {
@@ -59,7 +57,4 @@ public class IniciarPagoRequest {
     public void setMetodoPago(String metodoPago) {
         this.metodoPago = metodoPago;
     }
-
-    public BigDecimal getMonto() { return monto; }
-    public void setMonto(BigDecimal monto) { this.monto = monto; }
 }

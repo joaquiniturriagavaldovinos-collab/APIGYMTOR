@@ -116,12 +116,12 @@ public class PedidoController {
             ),
             @ApiResponse(responseCode = "404", description = "Pedido no encontrado", content = @Content)
     })
-    @PostMapping("/{pedidoId}/pago")
+    @PostMapping("/{id}/iniciar-pago")
     public ResponseEntity<PedidoResponse> iniciarPago(
-            @Parameter(description = "ID del pedido", example = "ped_123")
-            @PathVariable String pedidoId
-    ) {
-        PedidoResponse response = iniciarPagoPedidoUseCase.ejecutar(pedidoId);
+            @PathVariable String id,
+            @RequestParam String metodoPago) {
+
+        PedidoResponse response = iniciarPagoPedidoUseCase.ejecutar(id, metodoPago);
         return ResponseEntity.ok(response);
     }
 

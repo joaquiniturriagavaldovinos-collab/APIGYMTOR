@@ -1,6 +1,8 @@
 package ApiGymorEjecucion.Api.domain.model.Pago;
 
 
+import java.util.Arrays;
+
 /**
  * Métodos de pago disponibles en el sistema
  */
@@ -45,9 +47,16 @@ public enum MetodoPago {
             throw new IllegalArgumentException("El método de pago es obligatorio");
         }
         try {
-            return MetodoPago.valueOf(value.toUpperCase()); // asegura mayúsculas
+            // Normaliza: reemplaza espacios por guiones bajos y convierte a mayúsculas
+            String normalized = value.trim()
+                    .replace(" ", "_")
+                    .toUpperCase();
+            return MetodoPago.valueOf(normalized);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Método de pago inválido: " + value);
+            throw new IllegalArgumentException(
+                    "Método de pago inválido: " + value +
+                            ". Valores permitidos: " + Arrays.toString(MetodoPago.values())
+            );
         }
     }
 }
