@@ -1,6 +1,7 @@
 package ApiGymorEjecucion.Api.application.usecase.pago;
 
 import ApiGymorEjecucion.Api.application.dto.response.pago.PagoResponse;
+import ApiGymorEjecucion.Api.application.mapper.PagoMapper;
 import ApiGymorEjecucion.Api.domain.model.Pago.MetodoPago;
 import ApiGymorEjecucion.Api.domain.model.Pago.Pago;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
@@ -15,7 +16,7 @@ import java.util.UUID;
 public class IniciarPagoUseCase {
 
     private final PagoRepository pagoRepository;
-    private final PedidoRepository pedidoRepository; // ← Agregar
+    private final PedidoRepository pedidoRepository;
 
     public IniciarPagoUseCase(
             PagoRepository pagoRepository,
@@ -39,17 +40,37 @@ public class IniciarPagoUseCase {
         return crearPago(pedidoId, pedido.getTotal(), metodo);
     }
 
+    // Sobrecarga 3: Retorna el dominio (usado por IniciarPagoPedidoUseCase)
+    public Pago ejecutarYRetornarDominio(
+            String pedidoId,
+            BigDecimal monto,
+            MetodoPago metodo) {
+
+        // Validaciones
+        validarDatos(pedidoId, monto, metodo);
+
+        // Crear pago
+        Pago pago = Pago.crear(
+                UUID.randomUUID().toString(),
+                pedidoId,
+                monto,
+                metodo
+        );
+
+        // Si requiere pasarela externa, iniciar procesamiento
+        if (metodo.requierePasarelaExterna()) {
+            pago.iniciarProcesamiento(generarReferenciaPasarela());
+        }
+
+        // Guardar y retornar
+        return pagoRepository.guardar(pago);
+    }
+
+    // ========== MÉTODOS PRIVADOS ==========
+
     private PagoResponse crearPago(String pedidoId, BigDecimal monto, MetodoPago metodo) {
         // Validaciones
-        if (pedidoId == null || pedidoId.isBlank()) {
-            throw new IllegalArgumentException("El ID del pedido es requerido");
-        }
-        if (monto == null || monto.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("El monto debe ser mayor a cero");
-        }
-        if (metodo == null) {
-            throw new IllegalArgumentException("El método de pago es requerido");
-        }
+        validarDatos(pedidoId, monto, metodo);
 
         // Crear pago
         Pago pago = Pago.crear(
@@ -68,27 +89,26 @@ public class IniciarPagoUseCase {
         // Guardar
         Pago saved = pagoRepository.guardar(pago);
 
-        return mapToResponse(saved);
+        // ✅ Usar mapper centralizado
+        return PagoMapper.toResponse(saved);
+    }
+
+    private void validarDatos(String pedidoId, BigDecimal monto, MetodoPago metodo) {
+        if (pedidoId == null || pedidoId.isBlank()) {
+            throw new IllegalArgumentException("El ID del pedido es requerido");
+        }
+        if (monto == null || monto.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El monto debe ser mayor a cero");
+        }
+        if (metodo == null) {
+            throw new IllegalArgumentException("El método de pago es requerido");
+        }
     }
 
     private String generarReferenciaPasarela() {
-        return "REF-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 8);
+        return "REF-" + System.currentTimeMillis() + "-" +
+                UUID.randomUUID().toString().substring(0, 8);
     }
 
-    private PagoResponse mapToResponse(Pago pago) {
-        PagoResponse response = new PagoResponse();
-        response.setId(pago.getId());
-        response.setPedidoId(pago.getPedidoId());
-        response.setMonto(pago.getMonto());
-        response.setMetodoPago(pago.getMetodoPago().name());
-        response.setMetodoPagoDescripcion(pago.getMetodoPago().getDescripcion());
-        response.setEstado(pago.getEstado().name());
-        response.setEstadoDescripcion(pago.getEstado().getDescripcion());
-        response.setReferenciaPasarela(pago.getReferenciaPasarela());
-        response.setFechaCreacion(pago.getFechaCreacion());
-        response.setFechaProcesamiento(pago.getFechaProcesamiento());
-        response.setEsExitoso(pago.esExitoso());
-        response.setEstaFinalizado(pago.estaFinalizado());
-        return response;
-    }
+
 }

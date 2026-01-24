@@ -1,22 +1,17 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
-
 import ApiGymorEjecucion.Api.application.dto.request.pago.ConfirmarPagoRequest;
-import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
-import ApiGymorEjecucion.Api.application.usecase.pedido.ConfirmarResultadoPagoUseCase;
+import ApiGymorEjecucion.Api.application.usecase.pago.ConfirmarResultadoPagoUseCase;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-@Tag(
-        name = "Webhooks",
-        description = "Endpoints para integraciones externas (pasarelas de pago)"
-)
+
+/**
+ * Controller para recibir webhooks/callbacks de pasarelas de pago
+ *
+ * IMPORTANTE: Este endpoint es público (sin autenticación)
+ * porque es llamado por servicios externos (Webpay, MercadoPago, etc.)
+ */
 @RestController
 @RequestMapping("/api/webhooks")
 public class WebhookController {
@@ -27,65 +22,36 @@ public class WebhookController {
         this.confirmarResultadoPagoUseCase = confirmarResultadoPagoUseCase;
     }
 
-    @Operation(
-            summary = "Webhook confirmación de pago",
-            description = "Endpoint llamado por la pasarela de pago para confirmar el resultado de una transacción"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Webhook procesado correctamente"
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Firma de webhook inválida",
-                    content = @Content
-            )
-    })
+    /**
+     * Webhook para confirmación de pago desde pasarelas externas
+     *
+     * Este endpoint es llamado automáticamente por:
+     * - Webpay (Transbank)
+     * - MercadoPago
+     * - Otras pasarelas
+     *
+     * Request esperado:
+     * {
+     *   "referencia": "REF-1769256000000-abc12345",
+     *   "estadoPago": "APROBADO",  // o "RECHAZADO"
+     *   "codigoAutorizacion": "AUTH-123456" // solo si APROBADO
+     * }
+     */
     @PostMapping("/pago")
-    public ResponseEntity<WebhookResponse> confirmarPago(
-            @RequestBody ConfirmarPagoRequest request,
-            @Parameter(
-                    description = "Firma de seguridad del webhook",
-                    example = "sha256=abc123"
-            )
-            @RequestHeader(value = "X-Webhook-Signature", required = false)
-            String signature
-    ) {
+    public ResponseEntity<String> confirmarPago(
+            @Valid @RequestBody ConfirmarPagoRequest request) {
 
-        // Validación de firma → va en filtro o service dedicado
-        PedidoResponse pedido =
-                confirmarResultadoPagoUseCase.ejecutar(request);
+        try {
+            confirmarResultadoPagoUseCase.ejecutar(request);
+            return ResponseEntity.ok("Pago procesado correctamente");
 
-        WebhookResponse response = new WebhookResponse(
-                "PROCESSED",
-                "Pago procesado correctamente",
-                pedido.getId()
-        );
+        } catch (IllegalArgumentException e) {
+            // Pago no encontrado o datos inválidos
+            return ResponseEntity.badRequest().body(e.getMessage());
 
-        return ResponseEntity.ok(response);
-    }
-
-    @Schema(description = "Respuesta estándar para webhooks")
-    public static class WebhookResponse {
-
-        @Schema(example = "PROCESSED")
-        private String status;
-
-        @Schema(example = "Pago procesado correctamente")
-        private String message;
-
-        @Schema(example = "ped_001")
-        private String pedidoId;
-
-        public WebhookResponse(String status, String message, String pedidoId) {
-            this.status = status;
-            this.message = message;
-            this.pedidoId = pedidoId;
+        } catch (Exception e) {
+            // Error interno
+            return ResponseEntity.status(500).body("Error al procesar el pago");
         }
-
-        public String getStatus() { return status; }
-        public String getMessage() { return message; }
-        public String getPedidoId() { return pedidoId; }
     }
 }

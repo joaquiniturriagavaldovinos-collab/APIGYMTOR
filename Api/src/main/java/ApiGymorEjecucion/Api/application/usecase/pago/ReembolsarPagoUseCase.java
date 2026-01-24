@@ -2,6 +2,7 @@ package ApiGymorEjecucion.Api.application.usecase.pago;
 
 import ApiGymorEjecucion.Api.application.dto.request.pago.ReembolsoRequest;
 import ApiGymorEjecucion.Api.application.dto.response.pago.PagoResponse;
+import ApiGymorEjecucion.Api.application.mapper.PagoMapper;
 import ApiGymorEjecucion.Api.domain.model.Pago.Pago;
 import ApiGymorEjecucion.Api.domain.repository.PagoRepository;
 import ApiGymorEjecucion.Api.infrastructure.external.payment.PagoGatewayClient;
@@ -15,14 +16,14 @@ public class ReembolsarPagoUseCase {
     private final PagoRepository pagoRepository;
     private final PagoGatewayClient pagoGatewayClient;
 
-    public ReembolsarPagoUseCase(PagoRepository pagoRepository,
-                                 PagoGatewayClient pagoGatewayClient) {
+    public ReembolsarPagoUseCase(
+            PagoRepository pagoRepository,
+            PagoGatewayClient pagoGatewayClient) {
         this.pagoRepository = pagoRepository;
         this.pagoGatewayClient = pagoGatewayClient;
     }
 
-    public PagoResponse ejecutar(
-            String pagoId, ReembolsoRequest request) {
+    public PagoResponse ejecutar(String pagoId, ReembolsoRequest request) {
 
         // Validar
         validarRequest(request);
@@ -60,13 +61,8 @@ public class ReembolsarPagoUseCase {
         // Persistir
         Pago actualizado = pagoRepository.guardar(pago);
 
-        // Aquí se podría:
-        // - Emitir evento PagoReembolsado
-        // - Actualizar estado del pedido si corresponde
-        // - Notificar al cliente
-
-        // Retornar
-        return mapearAResponse(actualizado);
+        // ✅ Retornar usando PagoMapper
+        return PagoMapper.toResponse(actualizado);
     }
 
     private void validarRequest(ReembolsoRequest request) {
@@ -78,17 +74,4 @@ public class ReembolsarPagoUseCase {
         }
     }
 
-    private PagoResponse mapearAResponse(Pago pago) {
-        PagoResponse response =
-                new PagoResponse();
-
-        response.setId(pago.getId());
-        response.setPedidoId(pago.getPedidoId());
-        response.setMonto(pago.getMonto());
-        response.setEstado(pago.getEstado().name());
-        response.setEstadoDescripcion(pago.getEstado().getDescripcion());
-        response.setReferenciaPasarela(pago.getReferenciaPasarela());
-
-        return response;
-    }
 }

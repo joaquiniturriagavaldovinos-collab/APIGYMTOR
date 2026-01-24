@@ -6,11 +6,18 @@ import jakarta.validation.constraints.Size;
 
 /**
  * DTO para webhook de confirmación de pago
+ *
+ * La pasarela de pago NO conoce el pedidoId, solo la referencia
  */
 public class ConfirmarPagoRequest {
 
-    @NotBlank(message = "El ID del pedido es obligatorio")
-    private String pedidoId;
+    /**
+     * Referencia única del pago generada por nosotros
+     * La pasarela nos la devuelve para identificar el pago
+     */
+    @NotBlank(message = "La referencia de pago es obligatoria")
+    @JsonProperty("referenciaPago") // Acepta "referenciaPago" o "referencia"
+    private String referenciaPago;
 
     /**
      * Estado del pago: APROBADO, RECHAZADO, FALLIDO
@@ -18,10 +25,15 @@ public class ConfirmarPagoRequest {
     @NotBlank(message = "El estado del pago es obligatorio")
     private String estadoPago;
 
-    @Size(max = 100, message = "La referencia no puede superar los 100 caracteres")
-    @JsonProperty("referencia") //  Acepta "referencia" o "referenciaPago"
-    private String referenciaPago;
+    /**
+     * Código de autorización (solo si el pago fue aprobado)
+     */
+    @Size(max = 100, message = "El código de autorización no puede superar los 100 caracteres")
+    private String codigoAutorizacion;
 
+    /**
+     * Motivo del rechazo/fallo (solo si el pago fue rechazado)
+     */
     @Size(max = 255, message = "El motivo del fallo no puede superar los 255 caracteres")
     private String motivoFallo;
 
@@ -29,10 +41,11 @@ public class ConfirmarPagoRequest {
     public ConfirmarPagoRequest() {
     }
 
-    public ConfirmarPagoRequest(String pedidoId, String estadoPago, String referenciaPago, String motivoFallo) {
-        this.pedidoId = pedidoId;
-        this.estadoPago = estadoPago;
+    public ConfirmarPagoRequest(String referenciaPago, String estadoPago,
+                                String codigoAutorizacion, String motivoFallo) {
         this.referenciaPago = referenciaPago;
+        this.estadoPago = estadoPago;
+        this.codigoAutorizacion = codigoAutorizacion;
         this.motivoFallo = motivoFallo;
     }
 
@@ -42,12 +55,12 @@ public class ConfirmarPagoRequest {
     }
 
     // Getters y Setters
-    public String getPedidoId() {
-        return pedidoId;
+    public String getReferenciaPago() {
+        return referenciaPago;
     }
 
-    public void setPedidoId(String pedidoId) {
-        this.pedidoId = pedidoId;
+    public void setReferenciaPago(String referenciaPago) {
+        this.referenciaPago = referenciaPago;
     }
 
     public String getEstadoPago() {
@@ -58,12 +71,12 @@ public class ConfirmarPagoRequest {
         this.estadoPago = estadoPago;
     }
 
-    public String getReferenciaPago() {
-        return referenciaPago;
+    public String getCodigoAutorizacion() {
+        return codigoAutorizacion;
     }
 
-    public void setReferenciaPago(String referenciaPago) {
-        this.referenciaPago = referenciaPago;
+    public void setCodigoAutorizacion(String codigoAutorizacion) {
+        this.codigoAutorizacion = codigoAutorizacion;
     }
 
     public String getMotivoFallo() {

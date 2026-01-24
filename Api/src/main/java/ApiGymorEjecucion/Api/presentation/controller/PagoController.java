@@ -4,9 +4,7 @@ import ApiGymorEjecucion.Api.application.dto.request.pago.*;
 import ApiGymorEjecucion.Api.application.dto.response.pago.PagoResponse;
 import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
 import ApiGymorEjecucion.Api.application.usecase.pago.*;
-import ApiGymorEjecucion.Api.application.usecase.pedido.ConfirmarResultadoPagoUseCase;
 import ApiGymorEjecucion.Api.application.usecase.pedido.IniciarPagoPedidoUseCase;
-import ApiGymorEjecucion.Api.domain.model.Pago.MetodoPago;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,12 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Tag(
@@ -56,21 +51,14 @@ public class PagoController {
         this.reembolsarPagoUseCase = reembolsarPagoUseCase;
     }
 
-    // -----------------------------------------
-    // CONFIRMAR RESULTADO DE PAGO (CALLBACK)
-    // -----------------------------------------
-    @Operation(summary = "Confirmar resultado de pago", description = "Endpoint callback de la pasarela de pagos")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Pago confirmado correctamente", content = @Content(schema = @Schema(implementation = PedidoResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Datos de confirmación inválidos", content = @Content)
-    })
     @PostMapping("/confirmacion")
-    public ResponseEntity<PedidoResponse> confirmarPago(
+    public ResponseEntity<Void> confirmarPago(
             @RequestBody ConfirmarPagoRequest request
     ) {
-        PedidoResponse response = confirmarResultadoPagoUseCase.ejecutar(request);
-        return ResponseEntity.ok(response);
+        confirmarResultadoPagoUseCase.ejecutar(request);
+        return ResponseEntity.ok().build();
     }
+
 
     // -----------------------------------------
     // LISTAR PAGOS POR PEDIDO

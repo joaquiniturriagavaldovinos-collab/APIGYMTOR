@@ -2,6 +2,7 @@ package ApiGymorEjecucion.Api.presentation.controller;
 
 import ApiGymorEjecucion.Api.application.dto.request.pago.ConfirmarPagoRequest;
 import ApiGymorEjecucion.Api.application.dto.request.pedido.*;
+import ApiGymorEjecucion.Api.application.dto.response.pedido.IniciarPagoResponse;
 import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
 import ApiGymorEjecucion.Api.application.usecase.pedido.*;
 
@@ -27,7 +28,6 @@ public class PedidoController {
 
     private final CrearPedidoUseCase crearPedidoUseCase;
     private final IniciarPagoPedidoUseCase iniciarPagoPedidoUseCase;
-    private final ConfirmarResultadoPagoUseCase confirmarResultadoPagoUseCase;
     private final PrepararPedidoUseCase prepararPedidoUseCase;
     private final DespacharPedidoUseCase despacharPedidoUseCase;
     private final ConfirmarEntregaUseCase confirmarEntregaUseCase;
@@ -37,7 +37,6 @@ public class PedidoController {
     public PedidoController(
             CrearPedidoUseCase crearPedidoUseCase,
             IniciarPagoPedidoUseCase iniciarPagoPedidoUseCase,
-            ConfirmarResultadoPagoUseCase confirmarResultadoPagoUseCase,
             PrepararPedidoUseCase prepararPedidoUseCase,
             DespacharPedidoUseCase despacharPedidoUseCase,
             ConfirmarEntregaUseCase confirmarEntregaUseCase,
@@ -46,7 +45,6 @@ public class PedidoController {
     ) {
         this.crearPedidoUseCase = crearPedidoUseCase;
         this.iniciarPagoPedidoUseCase = iniciarPagoPedidoUseCase;
-        this.confirmarResultadoPagoUseCase = confirmarResultadoPagoUseCase;
         this.prepararPedidoUseCase = prepararPedidoUseCase;
         this.despacharPedidoUseCase = despacharPedidoUseCase;
         this.confirmarEntregaUseCase = confirmarEntregaUseCase;
@@ -101,52 +99,15 @@ public class PedidoController {
         return ResponseEntity.ok(response);
     }
 
-    // -------------------------------------------------
-    // INICIAR PAGO
-    // -------------------------------------------------
-    @Operation(
-            summary = "Iniciar pago de pedido",
-            description = "Inicia el proceso de pago para un pedido existente"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Pago iniciado",
-                    content = @Content(schema = @Schema(implementation = PedidoResponse.class))
-            ),
-            @ApiResponse(responseCode = "404", description = "Pedido no encontrado", content = @Content)
-    })
     @PostMapping("/{id}/iniciar-pago")
-    public ResponseEntity<PedidoResponse> iniciarPago(
+    public ResponseEntity<IniciarPagoResponse> iniciarPago(
             @PathVariable String id,
             @RequestParam String metodoPago) {
 
-        PedidoResponse response = iniciarPagoPedidoUseCase.ejecutar(id, metodoPago);
+        IniciarPagoResponse response = iniciarPagoPedidoUseCase.ejecutar(id, metodoPago);
         return ResponseEntity.ok(response);
     }
 
-    // -------------------------------------------------
-    // CONFIRMACIÓN DE PAGO (CALLBACK)
-    // -------------------------------------------------
-    @Operation(
-            summary = "Confirmar resultado de pago",
-            description = "Endpoint callback utilizado por la pasarela de pagos"
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Resultado de pago confirmado",
-                    content = @Content(schema = @Schema(implementation = PedidoResponse.class))
-            ),
-            @ApiResponse(responseCode = "400", description = "Confirmación inválida", content = @Content)
-    })
-    @PostMapping("/pago/confirmacion")
-    public ResponseEntity<PedidoResponse> confirmarPago(
-            @RequestBody ConfirmarPagoRequest request
-    ) {
-        PedidoResponse response = confirmarResultadoPagoUseCase.ejecutar(request);
-        return ResponseEntity.ok(response);
-    }
 
     // -------------------------------------------------
     // PREPARAR PEDIDO
