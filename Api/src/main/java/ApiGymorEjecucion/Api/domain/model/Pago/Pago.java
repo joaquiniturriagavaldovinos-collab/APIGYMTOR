@@ -112,6 +112,12 @@ public class Pago {
      * Confirma el pago como exitoso
      */
     public void confirmarExitoso(String codigoAutorizacion) {
+        System.out.println("\n🎯 Pago.confirmarExitoso() - INICIO");
+        System.out.println("   ID del pago: " + this.id);
+        System.out.println("   Estado actual: " + this.estado);
+        System.out.println("   Código actual: " + this.codigoAutorizacion);
+        System.out.println("   Código a asignar: " + codigoAutorizacion);
+
         if (this.estado != EstadoPago.PROCESANDO && this.estado != EstadoPago.PENDIENTE) {
             throw new PagoInvalidoException(
                     String.format("No se puede confirmar un pago en estado %s", this.estado)
@@ -125,6 +131,12 @@ public class Pago {
         this.estado = EstadoPago.EXITOSO;
         this.codigoAutorizacion = codigoAutorizacion;
         this.fechaConfirmacion = LocalDateTime.now();
+
+        System.out.println("\n   ✅ Asignación completada:");
+        System.out.println("   Estado nuevo: " + this.estado);
+        System.out.println("   Código nuevo: " + this.codigoAutorizacion);
+        System.out.println("   Fecha confirmación: " + this.fechaConfirmacion);
+        System.out.println("🎯 Pago.confirmarExitoso() - FIN\n");
     }
 
     /**

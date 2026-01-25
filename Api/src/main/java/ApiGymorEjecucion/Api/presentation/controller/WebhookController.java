@@ -41,16 +41,24 @@ public class WebhookController {
     public ResponseEntity<String> confirmarPago(
             @Valid @RequestBody ConfirmarPagoRequest request) {
 
+        System.out.println("\n🌐🌐🌐 WEBHOOK RECIBIDO 🌐🌐🌐");
+        System.out.println("   Referencia: " + request.getReferenciaPago());
+        System.out.println("   Estado: " + request.getEstadoPago());
+        System.out.println("   Exitoso: " + request.isExitoso());
+        System.out.println("   Código: " + request.getCodigoAutorizacion());
+
         try {
             confirmarResultadoPagoUseCase.ejecutar(request);
+            System.out.println("✅ Webhook procesado correctamente\n");
             return ResponseEntity.ok("Pago procesado correctamente");
 
         } catch (IllegalArgumentException e) {
-            // Pago no encontrado o datos inválidos
+            System.out.println("❌ Error en webhook: " + e.getMessage() + "\n");
             return ResponseEntity.badRequest().body(e.getMessage());
 
         } catch (Exception e) {
-            // Error interno
+            System.out.println("❌ Error interno en webhook: " + e.getMessage() + "\n");
+            e.printStackTrace();
             return ResponseEntity.status(500).body("Error al procesar el pago");
         }
     }

@@ -18,15 +18,14 @@ public class ConsultarPagosPorPedidoUseCase {
     }
 
     public List<PagoResponse> ejecutar(String pedidoId) {
-        // Validar
-        if (pedidoId == null || pedidoId.isBlank()) {
-            throw new IllegalArgumentException("El ID del pedido es requerido");
-        }
-
-        // Buscar todos los pagos del pedido
         List<Pago> pagos = pagoRepository.buscarPorPedidoId(pedidoId);
 
-        // ✅ Mapear usando PagoMapper
+
+        pagos.forEach(pago -> {
+            System.out.println("🔍 Pago ID: " + pago.getId());
+            System.out.println("   Código Auth: " + pago.getCodigoAutorizacion());
+        });
+
         return PagoMapper.toResponseList(pagos);
     }
 }

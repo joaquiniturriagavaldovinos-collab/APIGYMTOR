@@ -24,11 +24,32 @@ public class PagoRepositoryJpa implements PagoRepository {
 
     @Override
     public Pago guardar(Pago pago) {
-        PagoEntity entity = mapToJpa(pago);
-        PagoEntity saved = jpaRepository.save(entity);
-        return mapToDomain(saved);
-    }
+        System.out.println("\n🔧 PagoRepositoryJpa.guardar() - INICIO");
+        System.out.println("   Pago ID: " + pago.getId());
+        System.out.println("   Estado dominio: " + pago.getEstado());
+        System.out.println("   Código dominio: " + pago.getCodigoAutorizacion());
 
+        PagoEntity entity = mapToJpa(pago);
+
+        System.out.println("\n🔧 Después de mapToJpa():");
+        System.out.println("   Código en entity: " + entity.getCodigoAutorizacion());
+
+        // ✅ USAR saveAndFlush para persistencia inmediata
+        PagoEntity saved = jpaRepository.saveAndFlush(entity);
+
+        System.out.println("\n🔧 Después de saveAndFlush():");
+        System.out.println("   ID guardado: " + saved.getId());
+        System.out.println("   Estado guardado: " + saved.getEstado());
+        System.out.println("   Código guardado: " + saved.getCodigoAutorizacion());
+
+        Pago resultado = mapToDomain(saved);
+
+        System.out.println("\n🔧 Después de mapToDomain():");
+        System.out.println("   Código en dominio retornado: " + resultado.getCodigoAutorizacion());
+        System.out.println("🔧 PagoRepositoryJpa.guardar() - FIN\n");
+
+        return resultado;
+    }
     @Override
     public Optional<Pago> buscarPorId(String id) {
         return jpaRepository.findById(id).map(this::mapToDomain);
@@ -86,6 +107,7 @@ public class PagoRepositoryJpa implements PagoRepository {
     /* ===================== MAPPERS ===================== */
 
     private PagoEntity mapToJpa(Pago pago) {
+        System.out.println("   🔹 mapToJpa() - INICIO");
         PagoEntity entity = new PagoEntity();
         entity.setId(pago.getId());
         entity.setPedidoId(pago.getPedidoId());
@@ -93,11 +115,17 @@ public class PagoRepositoryJpa implements PagoRepository {
         entity.setMetodoPago(pago.getMetodoPago());
         entity.setEstado(pago.getEstado());
         entity.setReferenciaPasarela(pago.getReferenciaPasarela());
-        entity.setCodigoAutorizacion(pago.getCodigoAutorizacion());
+
+        String codigo = pago.getCodigoAutorizacion();
+        System.out.println("   🔹 Asignando código: " + codigo);
+        entity.setCodigoAutorizacion(codigo);
+        System.out.println("   🔹 Código asignado en entity: " + entity.getCodigoAutorizacion());
+
         entity.setMotivoRechazo(pago.getMotivoRechazo());
         entity.setFechaCreacion(pago.getFechaCreacion());
         entity.setFechaProcesamiento(pago.getFechaProcesamiento());
         entity.setFechaConfirmacion(pago.getFechaConfirmacion());
+        System.out.println("   🔹 mapToJpa() - FIN");
         return entity;
     }
 

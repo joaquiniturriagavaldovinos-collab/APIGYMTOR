@@ -40,6 +40,10 @@ public class PagoMapper {
         response.setCodigoAutorizacion(pago.getCodigoAutorizacion());
         response.setMotivoRechazo(pago.getMotivoRechazo());
 
+        String codigoAuth = pago.getCodigoAutorizacion();
+        System.out.println("🔍 PagoMapper.toResponse - Código Auth: " + codigoAuth);
+        response.setCodigoAutorizacion(codigoAuth);
+
         // Fechas
         response.setFechaCreacion(pago.getFechaCreacion());
         response.setFechaProcesamiento(pago.getFechaProcesamiento());

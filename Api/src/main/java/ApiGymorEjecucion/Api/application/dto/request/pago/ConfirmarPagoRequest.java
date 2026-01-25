@@ -4,36 +4,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-/**
- * DTO para webhook de confirmación de pago
- *
- * La pasarela de pago NO conoce el pedidoId, solo la referencia
- */
 public class ConfirmarPagoRequest {
 
-    /**
-     * Referencia única del pago generada por nosotros
-     * La pasarela nos la devuelve para identificar el pago
-     */
     @NotBlank(message = "La referencia de pago es obligatoria")
-    @JsonProperty("referenciaPago") // Acepta "referenciaPago" o "referencia"
+    @JsonProperty("referenciaPago")
     private String referenciaPago;
 
-    /**
-     * Estado del pago: APROBADO, RECHAZADO, FALLIDO
-     */
     @NotBlank(message = "El estado del pago es obligatorio")
     private String estadoPago;
 
-    /**
-     * Código de autorización (solo si el pago fue aprobado)
-     */
     @Size(max = 100, message = "El código de autorización no puede superar los 100 caracteres")
     private String codigoAutorizacion;
 
-    /**
-     * Motivo del rechazo/fallo (solo si el pago fue rechazado)
-     */
     @Size(max = 255, message = "El motivo del fallo no puede superar los 255 caracteres")
     private String motivoFallo;
 
@@ -49,9 +31,21 @@ public class ConfirmarPagoRequest {
         this.motivoFallo = motivoFallo;
     }
 
-    // Método de utilidad
+    /**
+     * ✅ CORREGIDO: Acepta múltiples variantes
+     */
     public boolean isExitoso() {
-        return "APROBADO".equalsIgnoreCase(estadoPago);
+        if (estadoPago == null) {
+            return false;
+        }
+
+        String estado = estadoPago.trim().toUpperCase();
+
+        return estado.equals("APROBADO")
+                || estado.equals("EXITOSO")
+                || estado.equals("APPROVED")
+                || estado.equals("SUCCESS")
+                || estado.equals("COMPLETADO");
     }
 
     // Getters y Setters

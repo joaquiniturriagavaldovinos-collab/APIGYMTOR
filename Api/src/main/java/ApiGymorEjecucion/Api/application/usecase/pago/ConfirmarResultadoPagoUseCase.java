@@ -24,14 +24,24 @@ public class ConfirmarResultadoPagoUseCase {
     @Transactional
     public void ejecutar(ConfirmarPagoRequest request) {
 
+        System.out.println("\n========================================");
+        System.out.println("🚀 INICIANDO CONFIRMACIÓN DE PAGO");
+        System.out.println("========================================");
+
         // 1. Validar request
         validarRequest(request);
 
         // 2. Buscar pago por referencia de pasarela
+        System.out.println("🔍 Buscando pago con referencia: " + request.getReferenciaPago());
         Pago pago = pagoRepository.buscarPorReferenciaPasarela(request.getReferenciaPago())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "No se encontró el pago con referencia: " + request.getReferenciaPago()
                 ));
+
+        System.out.println("✅ Pago encontrado:");
+        System.out.println("   ID: " + pago.getId());
+        System.out.println("   Estado actual: " + pago.getEstado());
+        System.out.println("   Código actual: " + pago.getCodigoAutorizacion());
 
         // 3. Idempotencia: Si ya está procesado, no hacer nada
         if (pago.estaFinalizado()) {
@@ -48,22 +58,33 @@ public class ConfirmarResultadoPagoUseCase {
         // 5. Procesar según resultado
         if (request.isExitoso()) {
             // ✅ PAGO EXITOSO
+            System.out.println("\n✅ PROCESANDO PAGO EXITOSO");
 
             // Generar código de autorización si no viene
             String codigoAuth = request.getCodigoAutorizacion();
             if (codigoAuth == null || codigoAuth.isBlank() || "null".equals(codigoAuth)) {
                 codigoAuth = "AUTH-" + System.currentTimeMillis();
+                System.out.println("🔧 Código generado: " + codigoAuth);
+            } else {
+                System.out.println("📥 Código recibido: " + codigoAuth);
             }
 
-            // ⚠️ IMPORTANTE: Este método debe guardar el código
-            pago.confirmarExitoso(codigoAuth);
-            pedido.confirmarPago(request.getReferenciaPago());
+            System.out.println("\n📝 ANTES de confirmarExitoso():");
+            System.out.println("   pago.getEstado() = " + pago.getEstado());
+            System.out.println("   pago.getCodigoAutorizacion() = " + pago.getCodigoAutorizacion());
 
-            System.out.println("✅ Pago confirmado: " + pago.getId());
-            System.out.println("   Código Autorización: " + codigoAuth);
+            // ⚠️ ESTE ES EL MÉTODO CRÍTICO
+            pago.confirmarExitoso(codigoAuth);
+
+            System.out.println("\n📝 DESPUÉS de confirmarExitoso():");
+            System.out.println("   pago.getEstado() = " + pago.getEstado());
+            System.out.println("   pago.getCodigoAutorizacion() = " + pago.getCodigoAutorizacion());
+
+            pedido.confirmarPago(request.getReferenciaPago());
 
         } else {
             // ❌ PAGO RECHAZADO
+            System.out.println("\n❌ PROCESANDO PAGO RECHAZADO");
             String motivo = request.getMotivoFallo() != null
                     ? request.getMotivoFallo()
                     : "Pago rechazado por la pasarela";
@@ -71,18 +92,30 @@ public class ConfirmarResultadoPagoUseCase {
             pago.marcarRechazado(motivo);
             pedido.marcarPagoFallido(motivo);
 
-            System.out.println("❌ Pago rechazado: " + motivo);
+            System.out.println("   Motivo: " + motivo);
         }
 
         // 6. ⚠️ CRÍTICO: Persistir cambios
+        System.out.println("\n💾 GUARDANDO CAMBIOS EN BD...");
+        System.out.println("   Código ANTES de guardar: " + pago.getCodigoAutorizacion());
+
         Pago pagoGuardado = pagoRepository.guardar(pago);
+
+        System.out.println("   Código DESPUÉS de guardar (retornado): " + pagoGuardado.getCodigoAutorizacion());
+
+        // Verificación adicional: consultar de nuevo
+        System.out.println("\n🔍 VERIFICACIÓN: Consultando pago recién guardado...");
+        pagoRepository.buscarPorId(pagoGuardado.getId()).ifPresent(pagoVerificado -> {
+            System.out.println("   ID verificado: " + pagoVerificado.getId());
+            System.out.println("   Estado verificado: " + pagoVerificado.getEstado());
+            System.out.println("   Código verificado: " + pagoVerificado.getCodigoAutorizacion());
+        });
+
         pedidoRepository.guardar(pedido);
 
-        // 7. Verificar que se guardó
-        System.out.println("💾 Pago guardado en BD:");
-        System.out.println("   ID: " + pagoGuardado.getId());
-        System.out.println("   Estado: " + pagoGuardado.getEstado());
-        System.out.println("   Código Auth: " + pagoGuardado.getCodigoAutorizacion());
+        System.out.println("\n========================================");
+        System.out.println("✅ CONFIRMACIÓN COMPLETADA");
+        System.out.println("========================================\n");
     }
 
     private void validarRequest(ConfirmarPagoRequest request) {
