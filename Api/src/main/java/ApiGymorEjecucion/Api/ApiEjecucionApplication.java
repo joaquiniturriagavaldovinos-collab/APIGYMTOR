@@ -1,4 +1,4 @@
-package ApiGymorEjecucion.Api;lkkkkkkkkkkpooooo
+package ApiGymorEjecucion.Api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

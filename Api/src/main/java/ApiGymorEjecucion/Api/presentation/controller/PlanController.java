@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,17 +32,20 @@ public class PlanController {
     private final ActualizarPlanUseCase actualizarPlanUseCase;
     private final DesactivarPlanUseCase desactivarPlanUseCase;
     private final ListarPlanesUseCase listarPlanesUseCase;
+    private final ActivarPlanUseCase activarPlanUseCase;
 
     public PlanController(
             CrearPlanUseCase crearPlanUseCase,
             ActualizarPlanUseCase actualizarPlanUseCase,
             DesactivarPlanUseCase desactivarPlanUseCase,
-            ListarPlanesUseCase listarPlanesUseCase
+            ListarPlanesUseCase listarPlanesUseCase,
+            ActivarPlanUseCase activarPlanUseCase
     ) {
         this.crearPlanUseCase = crearPlanUseCase;
         this.actualizarPlanUseCase = actualizarPlanUseCase;
         this.desactivarPlanUseCase = desactivarPlanUseCase;
         this.listarPlanesUseCase = listarPlanesUseCase;
+        this.activarPlanUseCase = activarPlanUseCase;
     }
 
     // -------------------------------------------------
@@ -61,7 +65,7 @@ public class PlanController {
     })
     @PostMapping
     public ResponseEntity<PlanResponse> crearPlan(
-            @RequestBody CrearPlanRequest request
+            @Valid @RequestBody CrearPlanRequest request
     ) {
         PlanResponse response = crearPlanUseCase.ejecutar(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -156,5 +160,23 @@ public class PlanController {
         return ResponseEntity.ok(
                 listarPlanesUseCase.buscarPorId(id)
         );
+    }
+
+    @Operation(
+            summary = "Activar plan",
+            description = "Reactiva un plan previamente desactivado"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Plan activado correctamente"),
+            @ApiResponse(responseCode = "404", description = "Plan no encontrado", content = @Content),
+            @ApiResponse(responseCode = "400", description = "El plan ya está activo", content = @Content)
+    })
+    @PatchMapping("/{id}/activar")
+    public ResponseEntity<Void> activarPlan(
+            @Parameter(description = "ID del plan", example = "plan_basic")
+            @PathVariable String id
+    ) {
+        activarPlanUseCase.ejecutar(id);
+        return ResponseEntity.noContent().build();
     }
 }

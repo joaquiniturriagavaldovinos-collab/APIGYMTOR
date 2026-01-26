@@ -19,20 +19,15 @@ public class ActualizarPlanUseCase {
     }
 
     public PlanResponse ejecutar(String id, ActualizarPlanRequest request) {
-        // Buscar plan
         Plan plan = planRepository.buscarPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "No se encontró el plan con ID: " + id
                 ));
 
         // Actualizar precio
-        plan.actualizarPrecio(request.getNuevoPrecio());
+        plan.actualizarPrecio(request.getPrecio()); // ← Cambio aquí
 
-
-        // Persistir
         Plan actualizado = planRepository.guardar(plan);
-
-        // Retornar
         return mapearAResponse(actualizado);
     }
 
@@ -45,5 +40,4 @@ public class ActualizarPlanUseCase {
         response.setActivo(plan.isActivo());
         return response;
     }
-
 }
