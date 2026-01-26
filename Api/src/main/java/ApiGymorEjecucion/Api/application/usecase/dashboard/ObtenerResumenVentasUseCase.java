@@ -1,97 +1,70 @@
 package ApiGymorEjecucion.Api.application.usecase.dashboard;
 
 import ApiGymorEjecucion.Api.application.dto.response.dashboard.ResumenVentasResponse;
-import ApiGymorEjecucion.Api.domain.model.pedido.EstadoPedido;
-import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
-import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
+import ApiGymorEjecucion.Api.domain.model.Pago.EstadoPago;
+import ApiGymorEjecucion.Api.domain.model.Pago.Pago;
+import ApiGymorEjecucion.Api.domain.repository.PagoRepository;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
+import java.math.RoundingMode;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
-/**
- * Query: Obtener Resumen de Ventas
- *
- * NOTA: Este NO es un caso de uso de dominio puro.
- * Es una proyección/query para reportes.
- */
 @Service
 public class ObtenerResumenVentasUseCase {
 
-    private final PedidoRepository pedidoRepository;
+    private final PagoRepository pagoRepository;
 
-    public ObtenerResumenVentasUseCase(PedidoRepository pedidoRepository) {
-        this.pedidoRepository = pedidoRepository;
+    public ObtenerResumenVentasUseCase(PagoRepository pagoRepository) {
+        this.pagoRepository = pagoRepository;
     }
 
-    public ResumenVentasResponse ejecutar(LocalDate desde, LocalDate hasta) {
-        // Validar
-        if (desde == null) {
-            desde = LocalDate.now().minusMonths(1);
+    @Transactional(readOnly = true)
+    public ResumenVentasResponse ejecutar(LocalDate fechaInicio, LocalDate fechaFin) {
+
+        // Si no se especifican fechas, usar el mes actual
+        if (fechaInicio == null) {
+            fechaInicio = LocalDate.now().withDayOfMonth(1);
         }
-        if (hasta == null) {
-            hasta = LocalDate.now();
+        if (fechaFin == null) {
+            fechaFin = LocalDate.now();
         }
 
-        LocalDateTime fechaDesde = desde.atStartOfDay();
-        LocalDateTime fechaHasta = hasta.atTime(23, 59, 59);
-
-        // Obtener todos los pedidos
-        List<Pedido> todosPedidos = pedidoRepository.buscarTodos();
+        // Obtener todos los pagos exitosos
+        List<Pago> pagosExitosos = pagoRepository.buscarPorEstado(EstadoPago.EXITOSO);
 
         // Filtrar por rango de fechas
-        List<Pedido> pedidosEnRango = todosPedidos.stream()
-                .filter(p -> p.getFechaCreacion().isAfter(fechaDesde) &&
-                        p.getFechaCreacion().isBefore(fechaHasta))
-                .collect(Collectors.toList());
+        LocalDateTime inicioDateTime = fechaInicio.atStartOfDay();
+        LocalDateTime finDateTime = fechaFin.atTime(23, 59, 59);
+
+        List<Pago> pagosFiltrados = pagosExitosos.stream()
+                .filter(pago -> {
+                    LocalDateTime fechaPago = pago.getFechaConfirmacion();
+                    return fechaPago != null
+                            && !fechaPago.isBefore(inicioDateTime)
+                            && !fechaPago.isAfter(finDateTime);
+                })
+                .toList();
 
         // Calcular métricas
-        long totalPedidos = pedidosEnRango.size();
-
-        long pedidosCompletados = pedidosEnRango.stream()
-                .filter(p -> p.getEstado() == EstadoPedido.DELIVERED)
-                .count();
-
-        long pedidosPendientes = pedidosEnRango.stream()
-                .filter(p -> !p.estaFinalizado())
-                .count();
-
-        long pedidosCancelados = pedidosEnRango.stream()
-                .filter(p -> p.getEstado() == EstadoPedido.CANCELLED)
-                .count();
-
-        BigDecimal ventasTotales = pedidosEnRango.stream()
-                .filter(p -> p.getEstado() == EstadoPedido.DELIVERED)
-                .map(Pedido::calcularTotal)
+        long totalVentas = pagosFiltrados.size();
+        BigDecimal montoTotal = pagosFiltrados.stream()
+                .map(Pago::getMonto)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Ventas del día actual
-        LocalDate hoy = LocalDate.now();
-        BigDecimal ventasDelDia = todosPedidos.stream()
-                .filter(p -> p.getFechaCreacion().toLocalDate().equals(hoy))
-                .filter(p -> p.getEstado() == EstadoPedido.DELIVERED)
-                .map(Pedido::calcularTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        // Ticket promedio
-        BigDecimal ticketPromedio = pedidosCompletados > 0
-                ? ventasTotales.divide(BigDecimal.valueOf(pedidosCompletados), 2, java.math.RoundingMode.HALF_UP)
+        BigDecimal ventaPromedio = totalVentas > 0
+                ? montoTotal.divide(BigDecimal.valueOf(totalVentas), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
 
         // Construir response
         ResumenVentasResponse response = new ResumenVentasResponse();
-        response.setFechaDesde(desde);
-        response.setFechaHasta(hasta);
-        response.setTotalPedidos(totalPedidos);
-        response.setPedidosCompletados(pedidosCompletados);
-        response.setPedidosPendientes(pedidosPendientes);
-        response.setPedidosCancelados(pedidosCancelados);
-        response.setVentasTotales(ventasTotales);
-        response.setVentasDelDia(ventasDelDia);
-        response.setTicketPromedio(ticketPromedio);
+        response.setFechaInicio(fechaInicio);
+        response.setFechaFin(fechaFin);
+        response.setTotalVentas(totalVentas);
+        response.setMontoTotal(montoTotal);
+        response.setVentaPromedio(ventaPromedio);
 
         return response;
     }

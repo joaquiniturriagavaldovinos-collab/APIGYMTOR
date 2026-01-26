@@ -6,10 +6,11 @@ import ApiGymorEjecucion.Api.domain.model.pedido.ItemPedido;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ObtenerTopProductosUseCase {
@@ -20,37 +21,40 @@ public class ObtenerTopProductosUseCase {
         this.pedidoRepository = pedidoRepository;
     }
 
-    public List<ProductoTopResponse> ejecutar(int limit) {
-        // Validar
-        if (limit <= 0) {
-            limit = 10;
+    @Transactional(readOnly = true)
+    public List<ProductoTopResponse> ejecutar(int limite) {
+
+        // Validar límite
+        if (limite <= 0 || limite > 100) {
+            limite = 10; // Default
         }
 
-        // Obtener pedidos completados
-        List<Pedido> pedidosCompletados = pedidoRepository.buscarPorEstado(EstadoPedido.DELIVERED);
+        // Obtener todos los pedidos pagados
+        List<Pedido> pedidosPagados = pedidoRepository.buscarTodos().stream()
+                .filter(Pedido::estaPagado)
+                .toList();
 
-        // Agrupar por producto
+        // Agrupar productos por ID y contar ventas
         Map<String, ProductoStats> statsMap = new HashMap<>();
 
-        for (Pedido pedido : pedidosCompletados) {
+        for (Pedido pedido : pedidosPagados) {
             for (ItemPedido item : pedido.getItems()) {
-                ProductoStats stats = statsMap.getOrDefault(
-                        item.getProductoId(),
-                        new ProductoStats(item.getProductoId(), item.getNombre())
-                );
+                String productoId = item.getProductoId();
 
-                stats.incrementarCantidad(item.getCantidad());
-                stats.sumarVentas(item.getSubtotal());
+                statsMap.computeIfAbsent(productoId, k -> new ProductoStats(
+                        productoId,
+                        item.getNombre()
+                ));
 
-                statsMap.put(item.getProductoId(), stats);
+                ProductoStats stats = statsMap.get(productoId);
+                stats.agregarVenta(item.getCantidad(), item.getSubtotal());
             }
         }
 
-        // Ordenar por cantidad vendida y tomar top N
-        final int finalLimit = limit;
-        return statsMap.values().stream()
+        // Convertir a lista y ordenar por cantidad vendida
+        List<ProductoTopResponse> topProductos = statsMap.values().stream()
                 .sorted((a, b) -> Integer.compare(b.cantidadVendida, a.cantidadVendida))
-                .limit(finalLimit)
+                .limit(limite)
                 .map(stats -> {
                     ProductoTopResponse response = new ProductoTopResponse();
                     response.setProductoId(stats.productoId);
@@ -59,28 +63,25 @@ public class ObtenerTopProductosUseCase {
                     response.setTotalVentas(stats.totalVentas);
                     return response;
                 })
-                .collect(Collectors.toList());
+                .toList();
+
+        return topProductos;
     }
 
-    // Clase auxiliar interna
+    // Clase interna para acumular estadísticas
     private static class ProductoStats {
         String productoId;
         String nombre;
-        int cantidadVendida;
-        BigDecimal totalVentas;
+        int cantidadVendida = 0;
+        java.math.BigDecimal totalVentas = java.math.BigDecimal.ZERO;
 
         ProductoStats(String productoId, String nombre) {
             this.productoId = productoId;
             this.nombre = nombre;
-            this.cantidadVendida = 0;
-            this.totalVentas = BigDecimal.ZERO;
         }
 
-        void incrementarCantidad(int cantidad) {
+        void agregarVenta(int cantidad, java.math.BigDecimal monto) {
             this.cantidadVendida += cantidad;
-        }
-
-        void sumarVentas(BigDecimal monto) {
             this.totalVentas = this.totalVentas.add(monto);
         }
     }

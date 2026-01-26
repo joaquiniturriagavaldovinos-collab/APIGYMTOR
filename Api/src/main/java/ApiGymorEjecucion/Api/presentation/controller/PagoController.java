@@ -25,7 +25,6 @@ import java.util.List;
 @RequestMapping("/api/pagos")
 public class PagoController {
 
-    private final IniciarPagoUseCase iniciarPagoUseCase;
     private final IniciarPagoPedidoUseCase iniciarPagoPedidoUseCase;
     private final ConfirmarResultadoPagoUseCase confirmarResultadoPagoUseCase;
     private final ConsultarPagosPorPedidoUseCase consultarPagosPorPedidoUseCase;
@@ -38,7 +37,6 @@ public class PagoController {
 
 
     public PagoController(
-            IniciarPagoUseCase iniciarPagoUseCase,
             IniciarPagoPedidoUseCase iniciarPagoPedidoUseCase,
             ConfirmarResultadoPagoUseCase confirmarResultadoPagoUseCase,
             ConsultarPagosPorPedidoUseCase consultarPagosPorPedidoUseCase,
@@ -48,7 +46,6 @@ public class PagoController {
             ReintentarPagoUseCase reintentarPagoUseCase,
             ConsultarEstadoPagoUseCase consultarEstadoPagoUseCase
     ) {
-        this.iniciarPagoUseCase = iniciarPagoUseCase;
         this.iniciarPagoPedidoUseCase = iniciarPagoPedidoUseCase;
         this.confirmarResultadoPagoUseCase = confirmarResultadoPagoUseCase;
         this.consultarPagosPorPedidoUseCase = consultarPagosPorPedidoUseCase;
