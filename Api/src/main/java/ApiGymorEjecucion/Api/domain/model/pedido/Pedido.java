@@ -13,12 +13,6 @@ import java.util.Objects;
 /**
  * ENTIDAD CENTRAL DEL DOMINIO.
  * Representa un pedido de compra con su máquina de estados integrada.
- *
- * Responsabilidades:
- * - Mantener la integridad de su ciclo de vida
- * - Validar todas las transiciones de estado
- * - Calcular totales
- * - Registrar historial de cambios
  */
 public class Pedido {
     private final String id;
@@ -41,7 +35,6 @@ public class Pedido {
         this.historialEstados = new ArrayList<>();
         this.fechaCreacion = LocalDateTime.now();
         this.fechaActualizacion = LocalDateTime.now();
-
         this.total = calcularTotal();
 
         this.historialEstados.add(
@@ -76,7 +69,6 @@ public class Pedido {
 
     /**
      * Valida y ejecuta una transición de estado.
-     * Este método es privado - cada transición tiene su método público.
      */
     private void cambiarEstado(EstadoPedido nuevoEstado, String observacion) {
         // Validar que no sea estado final
@@ -90,6 +82,8 @@ public class Pedido {
         // Validar transición permitida
         if (!esTransicionValida(this.estado, nuevoEstado)) {
             throw new TransicionEstadoInvalidaException(
+                    this.estado,
+                    nuevoEstado,
                     String.format("Transición inválida: no se puede pasar de %s a %s",
                             this.estado.getDescripcion(),
                             nuevoEstado.getDescripcion())
@@ -102,14 +96,22 @@ public class Pedido {
         this.fechaActualizacion = LocalDateTime.now();
 
         // Registrar en historial
+        registrarTransicion(estadoAnterior, nuevoEstado, observacion);
+    }
+
+    /**
+     * ✅ MÉTODO FALTANTE: Registra una transición en el historial
+     */
+    private void registrarTransicion(EstadoPedido estadoAnterior,
+                                     EstadoPedido estadoNuevo,
+                                     String observacion) {
         this.historialEstados.add(
-                TransicionEstado.crear(estadoAnterior, nuevoEstado, observacion)
+                TransicionEstado.crear(estadoAnterior, estadoNuevo, observacion)
         );
     }
 
     /**
      * TABLA DE TRANSICIONES VÁLIDAS
-     * Define todas las transiciones permitidas según la especificación del negocio.
      */
     private boolean esTransicionValida(EstadoPedido actual, EstadoPedido nuevo) {
         return switch (actual) {
@@ -148,19 +150,46 @@ public class Pedido {
      * Transición: PAYMENT_PENDING -> PAID
      */
     public void confirmarPago(String referenciaPago) {
-        if (referenciaPago == null || referenciaPago.isBlank()) {
-            throw new IllegalArgumentException("La referencia de pago es requerida");
+        if (this.estado != EstadoPedido.PAYMENT_PENDING) {
+            throw new TransicionEstadoInvalidaException(
+                    this.estado,
+                    EstadoPedido.PAID,
+                    "Solo se puede confirmar el pago de pedidos pendientes de pago"
+            );
         }
+
+        this.estado = EstadoPedido.PAID;
         this.referenciaPago = referenciaPago;
-        cambiarEstado(EstadoPedido.PAID, "Pago confirmado: " + referenciaPago);
+        this.fechaActualizacion = LocalDateTime.now();
+
+        registrarTransicion(
+                EstadoPedido.PAYMENT_PENDING,
+                EstadoPedido.PAID,
+                "Pago confirmado exitosamente con referencia: " + referenciaPago
+        );
     }
 
     /**
-     * CU3: Confirmar Pago Fallido
+     * CU3: Marcar Pago Fallido
      * Transición: PAYMENT_PENDING -> FAILED
      */
     public void marcarPagoFallido(String motivo) {
-        cambiarEstado(EstadoPedido.FAILED, "Pago fallido: " + motivo);
+        if (this.estado != EstadoPedido.PAYMENT_PENDING) {
+            throw new TransicionEstadoInvalidaException(
+                    this.estado,
+                    EstadoPedido.FAILED,
+                    "Solo se puede marcar como fallido pedidos pendientes de pago"
+            );
+        }
+
+        this.estado = EstadoPedido.FAILED;
+        this.fechaActualizacion = LocalDateTime.now();
+
+        registrarTransicion(
+                EstadoPedido.PAYMENT_PENDING,
+                EstadoPedido.FAILED,
+                "Pago rechazado: " + motivo
+        );
     }
 
     /**
@@ -193,11 +222,12 @@ public class Pedido {
 
     /**
      * Cancelar Pedido (solo en estados permitidos)
-     * Transición: CREATED/PAYMENT_PENDING/PAID/PREPARING -> CANCELLED
      */
     public void cancelar(String motivo) {
         if (!this.estado.permiteCanelacion() && this.estado != EstadoPedido.PREPARING) {
             throw new TransicionEstadoInvalidaException(
+                    this.estado,
+                    EstadoPedido.CANCELLED,
                     String.format("No se puede cancelar un pedido en estado %s",
                             this.estado.getDescripcion())
             );
@@ -243,10 +273,10 @@ public class Pedido {
         return estado;
     }
 
-
     public BigDecimal getTotal() {
         return total;
     }
+
     /**
      * Retorna copia inmutable de los items
      */
@@ -281,11 +311,21 @@ public class Pedido {
     // MÉTODOS DE CONSULTA
     // ==========================================
 
+    /**
+     * ✅ CORREGIDO: Verifica si el pedido está pagado
+     */
     public boolean estaPagado() {
         return this.estado == EstadoPedido.PAID
                 || this.estado == EstadoPedido.PREPARING
                 || this.estado == EstadoPedido.DISPATCHED
                 || this.estado == EstadoPedido.DELIVERED;
+    }
+
+    /**
+     * ✅ NUEVO: Verifica si el pedido está en estado final
+     */
+    public boolean esFinal() {
+        return this.estado.esFinal();
     }
 
     public boolean estaFinalizado() {
@@ -324,5 +364,4 @@ public class Pedido {
                 id, estado, total, items.size()
         );
     }
-
 }

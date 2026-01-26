@@ -62,25 +62,37 @@ public class PedidoMapper {
         if (pedido == null) return null;
 
         PedidoResponse response = new PedidoResponse();
+
+        // Identificadores
         response.setId(pedido.getId());
         response.setClienteId(pedido.getClienteId());
+
+        // Estado
         response.setEstado(pedido.getEstado().name());
         response.setEstadoDescripcion(pedido.getEstado().getDescripcion());
+        response.setEstaPagado(pedido.estaPagado()); //
+        response.setEsFinal(pedido.esFinal());
+
+        // Items
+        List<ItemPedidoResponse> itemsResponse = pedido.getItems().stream()
+                .map(PedidoMapper::toItemResponse)
+                .toList();
+        response.setItems(itemsResponse);
+        response.setCantidadItems(pedido.getItems().size());
+
+        // Montos
         response.setTotal(pedido.calcularTotal());
+
+        // Fechas
         response.setFechaCreacion(pedido.getFechaCreacion());
         response.setFechaActualizacion(pedido.getFechaActualizacion());
+
+        // Referencias
         response.setReferenciaPago(pedido.getReferenciaPago());
         response.setGuiaDespacho(pedido.getGuiaDespacho());
 
-        // Mapear items
-        List<ItemPedidoResponse> itemsResponse = pedido.getItems().stream()
-                .map(PedidoMapper::toItemResponse)
-                .collect(Collectors.toList());
-        response.setItems(itemsResponse);
-
         return response;
     }
-
     /**
      * Convierte un ItemPedido de dominio a ItemPedidoResponse
      */

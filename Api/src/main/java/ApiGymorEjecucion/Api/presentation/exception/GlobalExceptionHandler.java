@@ -3,6 +3,8 @@ package ApiGymorEjecucion.Api.presentation.exception;
 import ApiGymorEjecucion.Api.domain.exception.*;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hibernate.LazyInitializationException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -15,15 +17,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Manejador global de excepciones
- *
- * FILOSOFÍA:
- * - Devolver información útil al cliente (frontend/API consumers)
- * - Loggear información técnica completa en servidor
- * - NO ocultar errores de negocio (son esperados y útiles)
- * - SÍ ocultar detalles técnicos peligrosos (stacktraces, SQL, paths)
- */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -44,7 +37,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Error de validación",
-                "Campos inválidos: " + errores,  // ← Info útil para el cliente
+                "Campos inválidos: " + errores,
                 LocalDateTime.now(),
                 request.getRequestURI()
         );
@@ -68,7 +61,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
-    // ===== REGLAS DE NEGOCIO (Devolver mensaje completo) =====
+    // ===== REGLAS DE NEGOCIO =====
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(
@@ -78,7 +71,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Solicitud inválida",
-                ex.getMessage(),  // ← "El RUT ya está registrado", útil para el usuario
+                ex.getMessage(),
                 LocalDateTime.now(),
                 request.getRequestURI()
         );
@@ -94,7 +87,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
                 "Operación no permitida",
-                ex.getMessage(),  // ← "El cliente ya está desactivado", útil
+                ex.getMessage(),
                 LocalDateTime.now(),
                 request.getRequestURI()
         );
@@ -102,7 +95,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 
-    // ===== EXCEPCIONES DE DOMINIO (Información de negocio) =====
+    // ===== EXCEPCIONES DE DOMINIO =====
 
     @ExceptionHandler(PedidoNoEncontradoException.class)
     public ResponseEntity<ErrorResponse> handlePedidoNoEncontrado(
@@ -128,7 +121,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
                 "Stock insuficiente",
-                ex.getMessage(),  // ← "Solo quedan 5 unidades del producto X"
+                ex.getMessage(),
                 LocalDateTime.now(),
                 request.getRequestURI()
         );
@@ -144,7 +137,7 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
                 "Transición de estado inválida",
-                ex.getMessage(),  // ← "No se puede pasar de ENTREGADO a PENDIENTE"
+                ex.getMessage(),
                 LocalDateTime.now(),
                 request.getRequestURI()
         );
@@ -184,6 +177,50 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
+    // ===== ERRORES DE PERSISTENCIA (✅ NUEVO) =====
+
+    @ExceptionHandler(LazyInitializationException.class)
+    public ResponseEntity<ErrorResponse> handleLazyInitialization(
+            LazyInitializationException ex,
+            HttpServletRequest request) {
+
+        // Log en servidor (para debugging)
+        System.err.println("⚠️ LazyInitializationException en: " + request.getRequestURI());
+        System.err.println("   Detalle: " + ex.getMessage());
+
+        // ✅ Respuesta al cliente (SIN detalles técnicos)
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Error al procesar la solicitud",
+                "Error al cargar los datos. Por favor intente nuevamente.",
+                LocalDateTime.now(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+
+    @ExceptionHandler(JpaSystemException.class)
+    public ResponseEntity<ErrorResponse> handleJpaSystemException(
+            JpaSystemException ex,
+            HttpServletRequest request) {
+
+        // Log en servidor
+        System.err.println("⚠️ JpaSystemException en: " + request.getRequestURI());
+        System.err.println("   Detalle: " + ex.getMessage());
+
+        // ✅ Respuesta al cliente (SIN detalles técnicos)
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Error al procesar la solicitud",
+                "Error en la operación de base de datos. Por favor intente nuevamente.",
+                LocalDateTime.now(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+
     // ===== SERIALIZACIÓN JSON =====
 
     @ExceptionHandler(InvalidDefinitionException.class)
@@ -191,12 +228,10 @@ public class GlobalExceptionHandler {
             InvalidDefinitionException ex,
             HttpServletRequest request) {
 
-        // Log completo en servidor (para debugging)
-        System.err.println("⚠ ERROR DE SERIALIZACIÓN JSON:");
+        System.err.println("⚠️ ERROR DE SERIALIZACIÓN JSON:");
         System.err.println("   Tipo: " + ex.getType());
         System.err.println("   Detalle: " + ex.getMessage());
 
-        // Respuesta al cliente (sin stacktrace, pero útil)
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Error de serialización",
@@ -215,18 +250,18 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request) {
 
-        // ===== LOG COMPLETO EN SERVIDOR (debugging) =====
-        System.err.println(" ERROR INESPERADO:");
+        // Log completo en servidor
+        System.err.println("🔥 ERROR INESPERADO:");
         System.err.println("   Tipo: " + ex.getClass().getName());
         System.err.println("   Mensaje: " + ex.getMessage());
         System.err.println("   Path: " + request.getRequestURI());
-        ex.printStackTrace();  // ← Stacktrace SOLO en logs
+        ex.printStackTrace();
 
-        // ===== RESPUESTA AL CLIENTE (sin stacktrace) =====
+        // ✅ Respuesta al cliente (SIN stacktrace)
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                ex.getClass().getSimpleName(),  // ← Tipo de error (útil)
-                ex.getMessage() != null ? ex.getMessage() : "Error inesperado en el servidor",  // ← Mensaje descriptivo
+                "Error inesperado",
+                "Ha ocurrido un error inesperado. Por favor intente nuevamente.",
                 LocalDateTime.now(),
                 request.getRequestURI()
         );

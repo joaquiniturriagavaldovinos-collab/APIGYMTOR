@@ -18,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(
         name = "Pedidos",
         description = "Gestión del ciclo de vida completo de los pedidos"
@@ -33,6 +35,8 @@ public class PedidoController {
     private final ConfirmarEntregaUseCase confirmarEntregaUseCase;
     private final CancelarPedidoUseCase cancelarPedidoUseCase;
     private final ConsultarEstadoPedidoUseCase consultarEstadoPedidoUseCase;
+    private final ListarPedidosPorClienteUseCase listarPedidosPorClienteUseCase;
+    private final ListarPedidosPorEstadoUseCase listarPedidosPorEstadoUseCase;
 
     public PedidoController(
             CrearPedidoUseCase crearPedidoUseCase,
@@ -41,7 +45,9 @@ public class PedidoController {
             DespacharPedidoUseCase despacharPedidoUseCase,
             ConfirmarEntregaUseCase confirmarEntregaUseCase,
             CancelarPedidoUseCase cancelarPedidoUseCase,
-            ConsultarEstadoPedidoUseCase consultarEstadoPedidoUseCase
+            ConsultarEstadoPedidoUseCase consultarEstadoPedidoUseCase,
+            ListarPedidosPorClienteUseCase listarPedidosPorClienteUseCase,
+            ListarPedidosPorEstadoUseCase listarPedidosPorEstadoUseCase
     ) {
         this.crearPedidoUseCase = crearPedidoUseCase;
         this.iniciarPagoPedidoUseCase = iniciarPagoPedidoUseCase;
@@ -50,7 +56,10 @@ public class PedidoController {
         this.confirmarEntregaUseCase = confirmarEntregaUseCase;
         this.cancelarPedidoUseCase = cancelarPedidoUseCase;
         this.consultarEstadoPedidoUseCase = consultarEstadoPedidoUseCase;
+        this.listarPedidosPorClienteUseCase = listarPedidosPorClienteUseCase;
+        this.listarPedidosPorEstadoUseCase = listarPedidosPorEstadoUseCase;
     }
+
 
     // -------------------------------------------------
     // CREAR PEDIDO
@@ -204,5 +213,20 @@ public class PedidoController {
     ) {
         PedidoResponse response = cancelarPedidoUseCase.ejecutar(pedidoId, motivo);
         return ResponseEntity.ok(response);
+    }
+
+
+    // Listar pedidos de un cliente
+    @GetMapping("/cliente/{clienteId}")
+    public ResponseEntity<List<PedidoResponse>> listarPedidosCliente(
+            @PathVariable String clienteId) {
+        return ResponseEntity.ok(listarPedidosPorClienteUseCase.ejecutar(clienteId));
+    }
+
+    // Listar pedidos por estado (para admin)
+    @GetMapping("/estado/{estado}")
+    public ResponseEntity<List<PedidoResponse>> listarPedidosPorEstado(
+            @PathVariable String estado) {
+        return ResponseEntity.ok(listarPedidosPorEstadoUseCase.ejecutar(estado));
     }
 }

@@ -13,15 +13,14 @@ public class ConfirmarPagoRequest {
     @NotBlank(message = "El estado del pago es obligatorio")
     private String estadoPago;
 
-    @Size(max = 100, message = "El código de autorización no puede superar los 100 caracteres")
+    @Size(max = 100)
     private String codigoAutorizacion;
 
-    @Size(max = 255, message = "El motivo del fallo no puede superar los 255 caracteres")
+    @Size(max = 255)
     private String motivoFallo;
 
     // Constructors
-    public ConfirmarPagoRequest() {
-    }
+    public ConfirmarPagoRequest() {}
 
     public ConfirmarPagoRequest(String referenciaPago, String estadoPago,
                                 String codigoAutorizacion, String motivoFallo) {
@@ -32,12 +31,10 @@ public class ConfirmarPagoRequest {
     }
 
     /**
-     * ✅ CORREGIDO: Acepta múltiples variantes
+     * Acepta múltiples variantes de estado exitoso
      */
     public boolean isExitoso() {
-        if (estadoPago == null) {
-            return false;
-        }
+        if (estadoPago == null) return false;
 
         String estado = estadoPago.trim().toUpperCase();
 
@@ -45,38 +42,27 @@ public class ConfirmarPagoRequest {
                 || estado.equals("EXITOSO")
                 || estado.equals("APPROVED")
                 || estado.equals("SUCCESS")
+                || estado.equals("PAID")
                 || estado.equals("COMPLETADO");
     }
 
     // Getters y Setters
-    public String getReferenciaPago() {
-        return referenciaPago;
-    }
-
+    public String getReferenciaPago() { return referenciaPago; }
     public void setReferenciaPago(String referenciaPago) {
         this.referenciaPago = referenciaPago;
     }
 
-    public String getEstadoPago() {
-        return estadoPago;
-    }
-
+    public String getEstadoPago() { return estadoPago; }
     public void setEstadoPago(String estadoPago) {
         this.estadoPago = estadoPago;
     }
 
-    public String getCodigoAutorizacion() {
-        return codigoAutorizacion;
-    }
-
+    public String getCodigoAutorizacion() { return codigoAutorizacion; }
     public void setCodigoAutorizacion(String codigoAutorizacion) {
         this.codigoAutorizacion = codigoAutorizacion;
     }
 
-    public String getMotivoFallo() {
-        return motivoFallo;
-    }
-
+    public String getMotivoFallo() { return motivoFallo; }
     public void setMotivoFallo(String motivoFallo) {
         this.motivoFallo = motivoFallo;
     }

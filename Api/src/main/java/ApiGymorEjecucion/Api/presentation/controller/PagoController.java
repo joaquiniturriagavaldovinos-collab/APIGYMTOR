@@ -1,6 +1,7 @@
 package ApiGymorEjecucion.Api.presentation.controller;
 
 import ApiGymorEjecucion.Api.application.dto.request.pago.*;
+import ApiGymorEjecucion.Api.application.dto.response.pago.EstadoPagoSimpleResponse;
 import ApiGymorEjecucion.Api.application.dto.response.pago.PagoResponse;
 import ApiGymorEjecucion.Api.application.dto.response.pedido.PedidoResponse;
 import ApiGymorEjecucion.Api.application.usecase.pago.*;
@@ -8,10 +9,7 @@ import ApiGymorEjecucion.Api.application.usecase.pedido.IniciarPagoPedidoUseCase
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import org.springframework.http.ResponseEntity;
@@ -33,6 +31,10 @@ public class PagoController {
     private final ConsultarPagosPorPedidoUseCase consultarPagosPorPedidoUseCase;
     private final ListarPagosUseCase listarPagosUseCase;
     private final ReembolsarPagoUseCase reembolsarPagoUseCase;
+    private final ConsultarPagoPorIdUseCase consultarPagoPorIdUseCase;
+    private final ReintentarPagoUseCase reintentarPagoUseCase;
+    private final ConsultarEstadoPagoUseCase consultarEstadoPagoUseCase;
+
 
 
     public PagoController(
@@ -41,7 +43,10 @@ public class PagoController {
             ConfirmarResultadoPagoUseCase confirmarResultadoPagoUseCase,
             ConsultarPagosPorPedidoUseCase consultarPagosPorPedidoUseCase,
             ListarPagosUseCase listarPagosUseCase,
-            ReembolsarPagoUseCase reembolsarPagoUseCase
+            ReembolsarPagoUseCase reembolsarPagoUseCase,
+            ConsultarPagoPorIdUseCase consultarPagoPorIdUseCase,
+            ReintentarPagoUseCase reintentarPagoUseCase,
+            ConsultarEstadoPagoUseCase consultarEstadoPagoUseCase
     ) {
         this.iniciarPagoUseCase = iniciarPagoUseCase;
         this.iniciarPagoPedidoUseCase = iniciarPagoPedidoUseCase;
@@ -49,7 +54,11 @@ public class PagoController {
         this.consultarPagosPorPedidoUseCase = consultarPagosPorPedidoUseCase;
         this.listarPagosUseCase = listarPagosUseCase;
         this.reembolsarPagoUseCase = reembolsarPagoUseCase;
+        this.consultarPagoPorIdUseCase = consultarPagoPorIdUseCase;
+        this.reintentarPagoUseCase = reintentarPagoUseCase;
+        this.consultarEstadoPagoUseCase = consultarEstadoPagoUseCase;
     }
+
 
     @PostMapping("/confirmacion")
     public ResponseEntity<Void> confirmarPago(
@@ -117,4 +126,25 @@ public class PagoController {
         PagoResponse response = reembolsarPagoUseCase.ejecutar(pagoId, request);
         return ResponseEntity.ok(response);
     }
-}
+
+
+
+    // Consultar un pago específico
+    @GetMapping("/{pagoId}")
+    public ResponseEntity<PagoResponse> consultarPago(@PathVariable String pagoId) {
+        PagoResponse pago = consultarPagoPorIdUseCase.ejecutar(pagoId);
+        return ResponseEntity.ok(pago);
+    }
+
+    // Reintentar pago fallido
+    @PostMapping("/{pagoId}/reintentar")
+    public ResponseEntity<PagoResponse> reintentarPago(@PathVariable String pagoId) {
+        PagoResponse nuevoPago = reintentarPagoUseCase.ejecutar(pagoId);
+        return ResponseEntity.ok(nuevoPago);
+    }
+
+    // Consultar solo el estado (para polling)
+    @GetMapping("/{pagoId}/estado")
+    public ResponseEntity<EstadoPagoSimpleResponse> consultarEstado(@PathVariable String pagoId) {
+        return ResponseEntity.ok(consultarEstadoPagoUseCase.ejecutar(pagoId));
+    }}
