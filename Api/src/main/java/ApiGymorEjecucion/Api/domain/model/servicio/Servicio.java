@@ -100,13 +100,45 @@ public class Servicio {
         this.precioSesion = nuevoPrecio;
     }
 
-    public void desactivar() {
-        this.activo = false;
+    public void actualizarNombre(String nuevoNombre) {
+        if (nuevoNombre == null || nuevoNombre.isBlank()) {
+            throw new IllegalArgumentException("El nombre no puede estar vacío");
+        }
+        if (nuevoNombre.length() > 100) {
+            throw new IllegalArgumentException("El nombre no puede superar los 100 caracteres");
+        }
+        this.nombre = nuevoNombre;
     }
 
-    public void activar() {
-        this.activo = true;
+    public void actualizarDescripcion(String nuevaDescripcion) {
+        if (nuevaDescripcion != null && nuevaDescripcion.length() > 500) {
+            throw new IllegalArgumentException("La descripción no puede superar los 500 caracteres");
+        }
+        this.descripcion = nuevaDescripcion;
     }
+
+    public void actualizarModalidad(ModalidadClase nuevaModalidad) {
+        if (nuevaModalidad == null) {
+            throw new IllegalArgumentException("La modalidad no puede ser nula");
+        }
+        this.modalidad = nuevaModalidad;
+    }
+
+    public void actualizarDuracion(int nuevaDuracion) {
+        if (nuevaDuracion <= 0) {
+            throw new IllegalArgumentException("La duración debe ser mayor a cero");
+        }
+        this.duracionMinutos = nuevaDuracion;
+    }
+
+    public void actualizarCapacidad(int nuevaCapacidad) {
+        if (nuevaCapacidad <= 0) {
+            throw new IllegalArgumentException("La capacidad debe ser mayor a cero");
+        }
+        this.capacidadMaxima = nuevaCapacidad;
+    }
+
+
 
     // Getters
     public String getId() {
@@ -145,6 +177,15 @@ public class Servicio {
         return fechaCreacion;
     }
 
+
+    public void desactivar() {
+        this.activo = false;
+    }
+
+    public void activar() {
+        this.activo = true;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -163,4 +204,5 @@ public class Servicio {
         return String.format("Servicio{id='%s', nombre='%s', modalidad=%s}",
                 id, nombre, modalidad);
     }
+
 }

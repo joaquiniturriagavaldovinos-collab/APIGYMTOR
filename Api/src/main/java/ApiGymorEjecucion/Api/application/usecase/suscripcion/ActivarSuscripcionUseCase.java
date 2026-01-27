@@ -5,24 +5,26 @@ import ApiGymorEjecucion.Api.domain.model.servicio.Suscripcion;
 import ApiGymorEjecucion.Api.domain.repository.SuscripcionRepository;
 import org.springframework.stereotype.Service;
 
+/**
+ * Caso de Uso: Activar/Reactivar Suscripción
+ *
+ * Activa una suscripción previamente suspendida.
+ */
 @Service
-public class RenovarSuscripcionUseCase {
+public class ActivarSuscripcionUseCase {
 
     private final SuscripcionRepository suscripcionRepository;
 
-    public RenovarSuscripcionUseCase(SuscripcionRepository suscripcionRepository) {
+    public ActivarSuscripcionUseCase(SuscripcionRepository suscripcionRepository) {
         this.suscripcionRepository = suscripcionRepository;
     }
 
-    public SuscripcionResponse ejecutar(
-            String suscripcionId, int duracionMeses) {
+    public SuscripcionResponse ejecutar(String suscripcionId) {
+        System.out.println("▶️ Activando suscripción: " + suscripcionId);
 
         // Validar
         if (suscripcionId == null || suscripcionId.isBlank()) {
             throw new IllegalArgumentException("El ID de la suscripción es requerido");
-        }
-        if (duracionMeses <= 0) {
-            throw new IllegalArgumentException("La duración debe ser mayor a cero");
         }
 
         // Buscar suscripción
@@ -31,19 +33,24 @@ public class RenovarSuscripcionUseCase {
                         "No se encontró la suscripción con ID: " + suscripcionId
                 ));
 
-        // DOMINIO: Renovar
-        suscripcion.renovar(duracionMeses);
+        // Validar que no esté ya activa
+        if (suscripcion.isActiva()) {
+            throw new IllegalStateException("La suscripción ya está activa");
+        }
+
+        // DOMINIO: Activar
+        suscripcion.activar();
 
         // Persistir
-        Suscripcion renovada = suscripcionRepository.guardar(suscripcion);
+        Suscripcion activada = suscripcionRepository.guardar(suscripcion);
 
-        // Retornar
-        return mapearAResponse(renovada);
+        System.out.println("✅ Suscripción activada exitosamente");
+
+        return mapearAResponse(activada);
     }
 
     private SuscripcionResponse mapearAResponse(Suscripcion suscripcion) {
         SuscripcionResponse response = new SuscripcionResponse();
-
         response.setId(suscripcion.getId());
         response.setClienteId(suscripcion.getClienteId());
         response.setPlanId(suscripcion.getPlanId());
@@ -56,7 +63,6 @@ public class RenovarSuscripcionUseCase {
         response.setEstaVigente(suscripcion.estaVigente());
         response.setEstaVencida(suscripcion.estaVencida());
         response.setDiasRestantes(suscripcion.diasRestantes());
-
         return response;
     }
 }

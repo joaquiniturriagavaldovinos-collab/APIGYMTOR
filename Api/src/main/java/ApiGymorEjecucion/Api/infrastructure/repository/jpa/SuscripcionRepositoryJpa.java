@@ -1,6 +1,5 @@
 package ApiGymorEjecucion.Api.infrastructure.repository.jpa;
 
-
 import ApiGymorEjecucion.Api.domain.model.servicio.Suscripcion;
 import ApiGymorEjecucion.Api.domain.repository.SuscripcionRepository;
 import ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.suscripcion.SuscripcionEntity;
@@ -13,12 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Adaptador JPA para Suscripción (Arquitectura Hexagonal + DDD)
- */
 @Repository
-@Primary  // Prioridad sobre InMemory si ambos están activos
-@Profile("!test")  // Se activa en todos los perfiles EXCEPTO test
+@Primary
+@Profile("!test")
 public class SuscripcionRepositoryJpa implements SuscripcionRepository {
 
     private final SuscripcionJpaRepository jpaRepository;
@@ -26,8 +22,6 @@ public class SuscripcionRepositoryJpa implements SuscripcionRepository {
     public SuscripcionRepositoryJpa(SuscripcionJpaRepository jpaRepository) {
         this.jpaRepository = jpaRepository;
     }
-
-    // ===== CRUD =====
 
     @Override
     public Suscripcion guardar(Suscripcion suscripcion) {
@@ -42,17 +36,12 @@ public class SuscripcionRepositoryJpa implements SuscripcionRepository {
                 .map(this::mapearADominio);
     }
 
+    // ✅ CORREGIR: Cambiar de buscarPorClienteId a buscarPorCliente
     @Override
-    public List<Suscripcion> buscarPorClienteId(String clienteId) {
+    public List<Suscripcion> buscarPorCliente(String clienteId) {
         return jpaRepository.findByClienteId(clienteId).stream()
                 .map(this::mapearADominio)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public Optional<Suscripcion> buscarActivaPorCliente(String clienteId) {
-        return jpaRepository.findByClienteIdAndActivaTrue(clienteId)
-                .map(this::mapearADominio);
     }
 
     @Override
@@ -63,17 +52,10 @@ public class SuscripcionRepositoryJpa implements SuscripcionRepository {
     }
 
     @Override
-    public List<Suscripcion> buscarVencidas() {
-        return jpaRepository
-                .findByFechaVencimientoBefore(LocalDateTime.now())
-                .stream()
+    public List<Suscripcion> buscarTodas() {
+        return jpaRepository.findAll().stream()
                 .map(this::mapearADominio)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean existeActivaPorCliente(String clienteId) {
-        return jpaRepository.existsByClienteIdAndActivaTrue(clienteId);
+                .toList();
     }
 
     @Override
@@ -85,7 +67,31 @@ public class SuscripcionRepositoryJpa implements SuscripcionRepository {
         return false;
     }
 
-    // ===== MAPPERS: Domain ↔ Entity =====
+    @Override
+    public long contar() {
+        return jpaRepository.count();
+    }
+
+    // ===== MÉTODOS AUXILIARES (no están en la interfaz pero son útiles) =====
+
+    public Optional<Suscripcion> buscarActivaPorCliente(String clienteId) {
+        return jpaRepository.findByClienteIdAndActivaTrue(clienteId)
+                .map(this::mapearADominio);
+    }
+
+    public List<Suscripcion> buscarVencidas() {
+        return jpaRepository
+                .findByFechaVencimientoBefore(LocalDateTime.now())
+                .stream()
+                .map(this::mapearADominio)
+                .collect(Collectors.toList());
+    }
+
+    public boolean existeActivaPorCliente(String clienteId) {
+        return jpaRepository.existsByClienteIdAndActivaTrue(clienteId);
+    }
+
+    // ===== MAPPERS =====
 
     private SuscripcionEntity mapearAEntity(Suscripcion s) {
         return new SuscripcionEntity(
@@ -102,6 +108,7 @@ public class SuscripcionRepositoryJpa implements SuscripcionRepository {
     }
 
     private Suscripcion mapearADominio(SuscripcionEntity e) {
+        // Reconstruir suscripción desde persistencia
         Suscripcion suscripcion = Suscripcion.crearDesdePersistencia(
                 e.getId(),
                 e.getClienteId(),
@@ -112,10 +119,12 @@ public class SuscripcionRepositoryJpa implements SuscripcionRepository {
                 e.getFechaContratacion()
         );
 
+        // Aplicar estado de activa/suspendida
         if (!e.isActiva()) {
             suscripcion.suspender();
         }
 
+        // Aplicar configuración de autorenovación
         if (e.isAutorrenovable()) {
             suscripcion.habilitarAutorenovacion();
         }

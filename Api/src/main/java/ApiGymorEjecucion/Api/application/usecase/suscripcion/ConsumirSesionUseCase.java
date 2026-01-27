@@ -1,16 +1,10 @@
 package ApiGymorEjecucion.Api.application.usecase.suscripcion;
 
-
 import ApiGymorEjecucion.Api.application.dto.response.suscripcion.SuscripcionResponse;
 import ApiGymorEjecucion.Api.domain.model.servicio.Suscripcion;
 import ApiGymorEjecucion.Api.domain.repository.SuscripcionRepository;
 import org.springframework.stereotype.Service;
 
-/**
- * Caso de Uso: Consumir Sesión
- *
- * Se ejecuta cuando el cliente asiste a una clase
- */
 @Service
 public class ConsumirSesionUseCase {
 
@@ -21,6 +15,8 @@ public class ConsumirSesionUseCase {
     }
 
     public SuscripcionResponse ejecutar(String suscripcionId) {
+        System.out.println("🏋️ Consumiendo sesión de: " + suscripcionId);
+
         // Validar
         if (suscripcionId == null || suscripcionId.isBlank()) {
             throw new IllegalArgumentException("El ID de la suscripción es requerido");
@@ -46,25 +42,38 @@ public class ConsumirSesionUseCase {
         }
 
         // DOMINIO: Consumir sesión
+        int sesionesAntes = suscripcion.getSesionesRestantes();
         suscripcion.consumirSesion();
+        int sesionesDespues = suscripcion.getSesionesRestantes();
+
+        System.out.println("   Sesiones antes: " + sesionesAntes);
+        System.out.println("   Sesiones después: " + sesionesDespues);
 
         // Persistir
         Suscripcion actualizada = suscripcionRepository.guardar(suscripcion);
 
-        // Retornar
+        System.out.println("✅ Sesión consumida exitosamente");
+
+        // Retornar con mapper COMPLETO
         return mapearAResponse(actualizada);
     }
 
+    // ✅ MAPPER COMPLETO (corregido)
     private SuscripcionResponse mapearAResponse(Suscripcion suscripcion) {
-        SuscripcionResponse response =
-                new SuscripcionResponse();
+        SuscripcionResponse response = new SuscripcionResponse();
 
         response.setId(suscripcion.getId());
         response.setClienteId(suscripcion.getClienteId());
+        response.setPlanId(suscripcion.getPlanId());
+        response.setFechaInicio(suscripcion.getFechaInicio());
+        response.setFechaVencimiento(suscripcion.getFechaVencimiento());
         response.setSesionesRestantes(suscripcion.getSesionesRestantes());
         response.setTieneSesionesIlimitadas(suscripcion.tieneSesionesIlimitadas());
         response.setActiva(suscripcion.isActiva());
+        response.setAutorrenovable(suscripcion.isAutorrenovable());
         response.setEstaVigente(suscripcion.estaVigente());
+        response.setEstaVencida(suscripcion.estaVencida());
+        response.setDiasRestantes(suscripcion.diasRestantes());
 
         return response;
     }

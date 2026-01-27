@@ -1,7 +1,6 @@
 package ApiGymorEjecucion.Api.infrastructure.repository.jpa.entity.suscripcion;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -36,10 +35,11 @@ public class SuscripcionEntity {
     @Column(name = "fecha_contratacion", nullable = false, updatable = false)
     private LocalDateTime fechaContratacion;
 
+    // Constructor vacío para JPA
     protected SuscripcionEntity() {
-        // JPA
     }
 
+    // Constructor completo
     public SuscripcionEntity(
             String id,
             String clienteId,
@@ -98,5 +98,43 @@ public class SuscripcionEntity {
 
     public LocalDateTime getFechaContratacion() {
         return fechaContratacion;
+    }
+
+    // ===== SETTERS (para JPA) =====
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setClienteId(String clienteId) {
+        this.clienteId = clienteId;
+    }
+
+    public void setPlanId(String planId) {
+        this.planId = planId;
+    }
+
+    public void setFechaInicio(LocalDateTime fechaInicio) {
+        this.fechaInicio = fechaInicio;
+    }
+
+    public void setFechaVencimiento(LocalDateTime fechaVencimiento) {
+        this.fechaVencimiento = fechaVencimiento;
+    }
+
+    public void setSesionesRestantes(int sesionesRestantes) {
+        this.sesionesRestantes = sesionesRestantes;
+    }
+
+    public void setActiva(boolean activa) {
+        this.activa = activa;
+    }
+
+    public void setAutorrenovable(boolean autorrenovable) {
+        this.autorrenovable = autorrenovable;
+    }
+
+    public void setFechaContratacion(LocalDateTime fechaContratacion) {
+        this.fechaContratacion = fechaContratacion;
     }
 }

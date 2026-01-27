@@ -11,6 +11,7 @@ public class TrackingResponse {
     private String descripcionEstado;
     private LocalDateTime fechaUltimaActualizacion;
     private boolean estaEntregado;
+    private String observaciones;  // ← AGREGAR
 
     // Getters y Setters
     public String getPedidoId() {
@@ -67,5 +68,14 @@ public class TrackingResponse {
 
     public void setEstaEntregado(boolean estaEntregado) {
         this.estaEntregado = estaEntregado;
+    }
+
+    // ✅ AGREGAR
+    public String getObservaciones() {
+        return observaciones;
+    }
+
+    public void setObservaciones(String observaciones) {
+        this.observaciones = observaciones;
     }
 }

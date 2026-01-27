@@ -7,23 +7,17 @@ import java.util.Optional;
 
 public interface SuscripcionRepository {
 
-    // ===== CRUD =====
-
     Suscripcion guardar(Suscripcion suscripcion);
 
     Optional<Suscripcion> buscarPorId(String id);
 
-    boolean eliminar(String id);
-
-    // ===== Queries =====
-
-    List<Suscripcion> buscarPorClienteId(String clienteId);
-
-    Optional<Suscripcion> buscarActivaPorCliente(String clienteId);
+    List<Suscripcion> buscarPorCliente(String clienteId);  // ← Este método existe
 
     List<Suscripcion> buscarActivas();
 
-    List<Suscripcion> buscarVencidas();
+    List<Suscripcion> buscarTodas();
 
-    boolean existeActivaPorCliente(String clienteId);
+    boolean eliminar(String id);
+
+    long contar();
 }
