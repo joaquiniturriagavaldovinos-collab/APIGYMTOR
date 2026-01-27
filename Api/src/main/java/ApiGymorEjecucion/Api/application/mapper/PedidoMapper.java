@@ -91,6 +91,9 @@ public class PedidoMapper {
         response.setReferenciaPago(pedido.getReferenciaPago());
         response.setGuiaDespacho(pedido.getGuiaDespacho());
 
+        response.setDespachoId(pedido.getDespachoId());  // ← AGREGAR
+
+
         return response;
     }
     /**

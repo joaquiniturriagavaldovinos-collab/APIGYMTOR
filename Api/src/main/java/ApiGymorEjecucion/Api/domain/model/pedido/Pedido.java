@@ -24,6 +24,7 @@ public class Pedido {
     private LocalDateTime fechaActualizacion;
     private String referenciaPago;
     private String guiaDespacho;
+    private String despachoId;
     private BigDecimal total;
 
     // Constructor privado - usar factory method
@@ -99,9 +100,6 @@ public class Pedido {
         registrarTransicion(estadoAnterior, nuevoEstado, observacion);
     }
 
-    /**
-     * ✅ MÉTODO FALTANTE: Registra una transición en el historial
-     */
     private void registrarTransicion(EstadoPedido estadoAnterior,
                                      EstadoPedido estadoNuevo,
                                      String observacion) {
@@ -257,6 +255,14 @@ public class Pedido {
                 .sum();
     }
 
+
+    public void asignarGuiaDespacho(String numeroGuia) {
+        if (numeroGuia == null || numeroGuia.isBlank()) {
+            throw new IllegalArgumentException("El número de guía es requerido");
+        }
+        this.guiaDespacho = numeroGuia;
+    }
+
     // ==========================================
     // GETTERS (Sin setters - inmutabilidad)
     // ==========================================
@@ -306,7 +312,9 @@ public class Pedido {
     public String getGuiaDespacho() {
         return guiaDespacho;
     }
-
+    public String getDespachoId() {
+        return despachoId;
+    }
     // ==========================================
     // MÉTODOS DE CONSULTA
     // ==========================================
@@ -339,6 +347,19 @@ public class Pedido {
     public boolean puedeDespacharse() {
         return this.estado == EstadoPedido.PREPARING;
     }
+
+
+    public void asignarDespacho(String despachoId, String numeroGuia) {
+        if (despachoId == null || despachoId.isBlank()) {
+            throw new IllegalArgumentException("El ID del despacho es requerido");
+        }
+        if (numeroGuia == null || numeroGuia.isBlank()) {
+            throw new IllegalArgumentException("El número de guía es requerido");
+        }
+        this.despachoId = despachoId;
+        this.guiaDespacho = numeroGuia;
+    }
+
 
     // ==========================================
     // EQUALS, HASHCODE, TOSTRING

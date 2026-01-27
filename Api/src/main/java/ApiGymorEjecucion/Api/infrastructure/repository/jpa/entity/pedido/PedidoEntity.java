@@ -37,6 +37,9 @@ public class PedidoEntity {
     @Column(name = "guia_despacho")
     private String guiaDespacho;
 
+    @Column(name = "despacho_id")  // ← AGREGAR
+    private String despachoId;
+
     // Items del pedido (OneToMany)
     @ElementCollection
     @CollectionTable(name = "pedido_items",
@@ -95,6 +98,14 @@ public class PedidoEntity {
     public List<TransicionEstadoEntity> getHistorialEstados() { return historialEstados; }
     public void setHistorialEstados(List<TransicionEstadoEntity> historialEstados) {
         this.historialEstados = historialEstados;
+    }
+
+    public String getDespachoId() {
+        return despachoId;
+    }
+
+    public void setDespachoId(String despachoId) {
+        this.despachoId = despachoId;
     }
 
 }

@@ -37,6 +37,9 @@ public class PedidoResponse {
     // Información de despacho (solo si existe)
     private String guiaDespacho;
 
+    private String despachoId;
+
+
     // Acciones disponibles
     private List<String> accionesDisponibles;
 
@@ -111,4 +114,14 @@ public class PedidoResponse {
     public void setMensajeEstado(String mensajeEstado) {
         this.mensajeEstado = mensajeEstado;
     }
+
+    public String getDespachoId() {
+        return despachoId;
+    }
+
+    public void setDespachoId(String despachoId) {
+        this.despachoId = despachoId;
+    }
+
+
 }

@@ -1,8 +1,11 @@
 package ApiGymorEjecucion.Api.application.usecase.pago;
 
 import ApiGymorEjecucion.Api.application.dto.request.pago.ConfirmarPagoRequest;
+import ApiGymorEjecucion.Api.application.usecase.despacho.CrearDespachoUseCase;
+import ApiGymorEjecucion.Api.domain.model.Despacho.Despacho;
 import ApiGymorEjecucion.Api.domain.model.Pago.Pago;
 import ApiGymorEjecucion.Api.domain.model.pedido.Pedido;
+import ApiGymorEjecucion.Api.domain.repository.DespachoRepository;
 import ApiGymorEjecucion.Api.domain.repository.PagoRepository;
 import ApiGymorEjecucion.Api.domain.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
@@ -13,12 +16,19 @@ public class ConfirmarResultadoPagoUseCase {
 
     private final PagoRepository pagoRepository;
     private final PedidoRepository pedidoRepository;
+    private final DespachoRepository despachoRepository;
+    private final CrearDespachoUseCase crearDespachoUseCase;
 
     public ConfirmarResultadoPagoUseCase(
             PagoRepository pagoRepository,
-            PedidoRepository pedidoRepository) {
+            PedidoRepository pedidoRepository,
+            DespachoRepository despachoRepository,
+            CrearDespachoUseCase crearDespachoUseCase
+    ) {
         this.pagoRepository = pagoRepository;
         this.pedidoRepository = pedidoRepository;
+        this.despachoRepository = despachoRepository;
+        this.crearDespachoUseCase = crearDespachoUseCase;
     }
 
     @Transactional
@@ -28,39 +38,33 @@ public class ConfirmarResultadoPagoUseCase {
         System.out.println("🚀 INICIANDO CONFIRMACIÓN DE PAGO");
         System.out.println("========================================");
 
-        // 1. Validar request
         validarRequest(request);
 
-        // 2. Buscar pago por referencia de pasarela
+        // 1. Buscar pago
         System.out.println("🔍 Buscando pago con referencia: " + request.getReferenciaPago());
         Pago pago = pagoRepository.buscarPorReferenciaPasarela(request.getReferenciaPago())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "No se encontró el pago con referencia: " + request.getReferenciaPago()
                 ));
+        System.out.println("✅ Pago encontrado: " + pago.getId());
 
-        System.out.println("✅ Pago encontrado:");
-        System.out.println("   ID: " + pago.getId());
-        System.out.println("   Estado actual: " + pago.getEstado());
-        System.out.println("   Código actual: " + pago.getCodigoAutorizacion());
-
-        // 3. Idempotencia: Si ya está procesado, no hacer nada
+        // 2. Idempotencia
         if (pago.estaFinalizado()) {
             System.out.println("⚠️ Pago ya procesado (webhook duplicado). Ignorando...");
             return;
         }
 
-        // 4. Buscar pedido asociado
+        // 3. Buscar pedido
         Pedido pedido = pedidoRepository.buscarPorId(pago.getPedidoId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "No se encontró el pedido: " + pago.getPedidoId()
                 ));
 
-        // 5. Procesar según resultado
+        // 4. Procesar según resultado
         if (request.isExitoso()) {
-            // ✅ PAGO EXITOSO
             System.out.println("\n✅ PROCESANDO PAGO EXITOSO");
 
-            // Generar código de autorización si no viene
+            // Generar código de autorización
             String codigoAuth = request.getCodigoAutorizacion();
             if (codigoAuth == null || codigoAuth.isBlank() || "null".equals(codigoAuth)) {
                 codigoAuth = "AUTH-" + System.currentTimeMillis();
@@ -69,18 +73,43 @@ public class ConfirmarResultadoPagoUseCase {
                 System.out.println("📥 Código recibido: " + codigoAuth);
             }
 
-            System.out.println("\n📝 ANTES de confirmarExitoso():");
-            System.out.println("   pago.getEstado() = " + pago.getEstado());
-            System.out.println("   pago.getCodigoAutorizacion() = " + pago.getCodigoAutorizacion());
-
-            // ⚠️ ESTE ES EL MÉTODO CRÍTICO
+            // Confirmar pago y pedido
             pago.confirmarExitoso(codigoAuth);
-
-            System.out.println("\n📝 DESPUÉS de confirmarExitoso():");
-            System.out.println("   pago.getEstado() = " + pago.getEstado());
-            System.out.println("   pago.getCodigoAutorizacion() = " + pago.getCodigoAutorizacion());
-
             pedido.confirmarPago(request.getReferenciaPago());
+
+            // ✅ CREAR DESPACHO
+            System.out.println("\n========================================");
+            System.out.println("📦 INICIANDO CREACIÓN DE DESPACHO");
+            System.out.println("========================================");
+
+            try {
+                String direccionCompleta = obtenerDireccionCliente(pedido.getClienteId());
+
+                Despacho despacho = crearDespachoUseCase.ejecutar(
+                        pedido.getId(),
+                        direccionCompleta
+                );
+
+                System.out.println("✅ Despacho creado: " + despacho.getId());
+                System.out.println("✅ Guía generada: " + despacho.getGuiaDespacho().getNumero());
+
+                // ⚠️ CRÍTICO: Asignar despacho ANTES de guardar
+                if (despacho.getGuiaDespacho() != null) {
+                    pedido.asignarDespacho(
+                            despacho.getId(),
+                            despacho.getGuiaDespacho().getNumero()
+                    );
+                    System.out.println("✅ Despacho asignado al pedido:");
+                    System.out.println("   Despacho ID: " + despacho.getId());
+                    System.out.println("   Guía: " + despacho.getGuiaDespacho().getNumero());
+                }
+
+            } catch (Exception e) {
+                System.out.println("❌ ERROR CRÍTICO al crear despacho:");
+                System.out.println("   Mensaje: " + e.getMessage());
+                e.printStackTrace();
+                // NO fallar el pago si hay error en despacho
+            }
 
         } else {
             // ❌ PAGO RECHAZADO
@@ -95,23 +124,19 @@ public class ConfirmarResultadoPagoUseCase {
             System.out.println("   Motivo: " + motivo);
         }
 
-        // 6. ⚠️ CRÍTICO: Persistir cambios
+        // ⚠️ CRÍTICO: Guardar TODO al final
         System.out.println("\n💾 GUARDANDO CAMBIOS EN BD...");
-        System.out.println("   Código ANTES de guardar: " + pago.getCodigoAutorizacion());
 
         Pago pagoGuardado = pagoRepository.guardar(pago);
+        System.out.println("✅ Pago guardado:");
+        System.out.println("   Estado: " + pagoGuardado.getEstado());
+        System.out.println("   Código: " + pagoGuardado.getCodigoAutorizacion());
 
-        System.out.println("   Código DESPUÉS de guardar (retornado): " + pagoGuardado.getCodigoAutorizacion());
-
-        // Verificación adicional: consultar de nuevo
-        System.out.println("\n🔍 VERIFICACIÓN: Consultando pago recién guardado...");
-        pagoRepository.buscarPorId(pagoGuardado.getId()).ifPresent(pagoVerificado -> {
-            System.out.println("   ID verificado: " + pagoVerificado.getId());
-            System.out.println("   Estado verificado: " + pagoVerificado.getEstado());
-            System.out.println("   Código verificado: " + pagoVerificado.getCodigoAutorizacion());
-        });
-
-        pedidoRepository.guardar(pedido);
+        Pedido pedidoGuardado = pedidoRepository.guardar(pedido);
+        System.out.println("✅ Pedido guardado:");
+        System.out.println("   Estado: " + pedidoGuardado.getEstado());
+        System.out.println("   Despacho ID: " + pedidoGuardado.getDespachoId());  // ← AGREGAR
+        System.out.println("   Guía: " + pedidoGuardado.getGuiaDespacho());
 
         System.out.println("\n========================================");
         System.out.println("✅ CONFIRMACIÓN COMPLETADA");
@@ -128,5 +153,11 @@ public class ConfirmarResultadoPagoUseCase {
         if (request.getEstadoPago() == null || request.getEstadoPago().isBlank()) {
             throw new IllegalArgumentException("El estado del pago es requerido");
         }
+    }
+
+    private String obtenerDireccionCliente(String clienteId) {
+        // TODO: Implementar obtención de dirección desde repositorio de Cliente
+        // Por ahora retornamos un placeholder
+        return "Av. Providencia 1234, Providencia, Santiago, Chile";
     }
 }

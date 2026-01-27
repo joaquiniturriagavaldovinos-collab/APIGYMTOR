@@ -99,6 +99,8 @@ public class PedidoRepositoryJpa implements PedidoRepository {
         entity.setFechaActualizacion(pedido.getFechaActualizacion());
         entity.setReferenciaPago(pedido.getReferenciaPago());
         entity.setGuiaDespacho(pedido.getGuiaDespacho());
+        entity.setDespachoId(pedido.getDespachoId());
+
 
         // Mapear items
         List<ItemPedidoEntity> itemsEntity = pedido.getItems().stream()
@@ -153,6 +155,12 @@ public class PedidoRepositoryJpa implements PedidoRepository {
                 Field guiaField = Pedido.class.getDeclaredField("guiaDespacho");
                 guiaField.setAccessible(true);
                 guiaField.set(pedido, entity.getGuiaDespacho());
+            }
+
+            if (entity.getDespachoId() != null) {
+                Field despachoIdField = Pedido.class.getDeclaredField("despachoId");
+                despachoIdField.setAccessible(true);
+                despachoIdField.set(pedido, entity.getDespachoId());
             }
 
             // Restaurar historial de estados
