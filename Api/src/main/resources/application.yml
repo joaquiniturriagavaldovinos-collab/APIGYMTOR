@@ -1,19 +1,6 @@
 spring:
   profiles:
-    active: local  # ← Perfil por defecto
+    active: local
 
-  # Configuración JPA general
   jpa:
-    open-in-view: false  # Evita lazy loading fuera de transacciones
-
-# Logging general
-logging:
-  level:
-    ApiGymorEjecucion.Api: DEBUG
-    org.springframework.security: DEBUG
-    org.hibernate.SQL: DEBUG
-
-# Valor por defecto para CORS (se sobrescribe en cada perfil)
-app:
-  cors:
-    allowed-origins: "http://localhost:8080"
+    open-in-view: false
