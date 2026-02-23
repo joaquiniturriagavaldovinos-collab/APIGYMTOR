@@ -19,12 +19,12 @@ services:
     depends_on:
       - db
     environment:
-      DB_URL: jdbc:postgresql://db:5432/gymor
-      DB_USER: postgres
-      DB_PASS: postgres
-      JWT_SECRET: supersecret
-      CORS_ALLOWED_ORIGINS: http://localhost:3000
-      SPRING_PROFILES_ACTIVE: prod
+        SPRING_PROFILES_ACTIVE: prod
+    DB_URL: jdbc:postgresql://db:5432/gymor
+    DB_USER: gymor
+    DB_PASS: gymor123
+    JWT_SECRET: mySuperSecretKeyForJwtThatIsAtLeast32Chars!!
+    CORS_ALLOWED_ORIGINS: http://localhost:3000
     ports:
       - "8080:8080"
 
