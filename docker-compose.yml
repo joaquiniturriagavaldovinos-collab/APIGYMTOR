@@ -30,6 +30,8 @@ services:
       DB_PASS: gymor123
       JWT_SECRET: mySuperSecretKeyForJwtThatIsAtLeast32Chars!!
       CORS_ALLOWED_ORIGINS: http://localhost:3000
+      TRANSBANK_API_KEY: test-key
+      TRANSBANK_COMMERCE_CODE: test-code
 
 volumes:
   postgres_data:
