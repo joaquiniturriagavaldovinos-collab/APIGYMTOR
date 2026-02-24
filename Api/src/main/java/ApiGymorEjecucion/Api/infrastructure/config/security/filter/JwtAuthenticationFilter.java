@@ -126,23 +126,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      *
      * IMPORTANTE: Mantener sincronizado con SecurityConfig
      */
-    private boolean esRutaPublica(String path, String method) {
-        return
-                // ===== SWAGGER / OPENAPI =====
-                path.startsWith("/v3/api-docs") ||
-                        path.startsWith("/swagger-ui") ||
-                        path.startsWith("/swagger-ui.html") ||
+private boolean esRutaPublica(String path, String method) {
+    return
+            // ===== SWAGGER / OPENAPI =====
+            path.startsWith("/v3/api-docs") ||
+                    path.startsWith("/swagger-ui") ||
+                    path.startsWith("/swagger-ui.html") ||
 
-                        // ===== WEBHOOKS =====
-                        path.startsWith("/api/webhooks") ||
+                    // ===== WEBHOOKS =====
+                    path.startsWith("/api/webhooks") ||
 
-                        // ===== PRODUCTOS (GET públicos) =====
-                        (path.equals("/api/productos") && method.equals("GET")) ||
-                        (path.startsWith("/api/productos/") && method.equals("GET")) ||
+                    // ===== PRODUCTOS (GET públicos) =====
+                    (path.equals("/api/productos") && method.equals("GET")) ||
+                    (path.startsWith("/api/productos/") && method.equals("GET")) ||
 
-                        // ===== REGISTRO CLIENTE (POST público) =====
-                        (path.equals("/api/v1/clientes") && method.equals("POST"));
-    }
+                    // ===== REGISTRO CLIENTE (POST público) =====
+                    (path.equals("/api/v1/clientes") && method.equals("POST")) ||
+
+                    // ===== AUTH =====
+                    path.startsWith("/api/auth");
+}
 
     /**
      * Escritura de error JSON

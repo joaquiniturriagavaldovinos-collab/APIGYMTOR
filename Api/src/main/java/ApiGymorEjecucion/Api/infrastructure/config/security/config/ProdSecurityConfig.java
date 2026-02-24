@@ -52,6 +52,8 @@ public class ProdSecurityConfig {
 
                         // ===== RUTAS PROTEGIDAS =====
                         .anyRequest().authenticated()
+
+                        .requestMatchers("/api/auth/**").permitAll()
                 )
 
                 .addFilterBefore(
