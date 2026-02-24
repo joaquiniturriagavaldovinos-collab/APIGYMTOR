@@ -29,32 +29,32 @@ public class ProdSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
+.authorizeHttpRequests(auth -> auth
+        // ===== SWAGGER / OPENAPI =====
+        .requestMatchers(
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html"
+        ).permitAll()
 
-                .authorizeHttpRequests(auth -> auth
-                        // ===== SWAGGER / OPENAPI =====
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
+        // ===== WEBHOOKS =====
+        .requestMatchers("/api/webhooks/**").permitAll()
 
-                        // ===== WEBHOOKS =====
-                        .requestMatchers("/api/webhooks/**").permitAll()
+        // ===== PRODUCTOS PÚBLICOS =====
+        .requestMatchers(
+                "/api/productos",
+                "/api/productos/**"
+        ).permitAll()
 
-                        // ===== PRODUCTOS PÚBLICOS =====
-                        .requestMatchers(
-                                "/api/productos",
-                                "/api/productos/**"
-                        ).permitAll()
+        // ===== REGISTRO CLIENTE =====
+        .requestMatchers("/api/v1/clientes").permitAll()
 
-                        // ===== REGISTRO CLIENTE =====
-                        .requestMatchers("/api/v1/clientes").permitAll()
+        // ===== AUTH =====
+        .requestMatchers("/api/auth/**").permitAll()
 
-                        // ===== RUTAS PROTEGIDAS =====
-                        .anyRequest().authenticated()
-
-                        .requestMatchers("/api/auth/**").permitAll()
-                )
+        // ===== RUTAS PROTEGIDAS =====
+        .anyRequest().authenticated()
+)
 
                 .addFilterBefore(
                         jwtAuthenticationFilter,
