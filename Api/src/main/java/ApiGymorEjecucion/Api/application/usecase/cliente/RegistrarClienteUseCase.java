@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 public class RegistrarClienteUseCase {
 
     private final ClienteRepository clienteRepository;
+    private final UsuarioRepository usuarioRepository;
+    rivate final BCryptPasswordEncoder passwordEncoder;
 
     public RegistrarClienteUseCase(ClienteRepository clienteRepository) {
         this.clienteRepository = clienteRepository;
@@ -74,6 +76,29 @@ public class RegistrarClienteUseCase {
         // Persistir
         Cliente clienteGuardado = clienteRepository.guardar(cliente);
 
+
+
+Cliente clienteGuardado = clienteRepository.guardar(cliente);
+
+Usuario usuario = Usuario.crear(
+        null,
+        request.getEmail(),
+        request.getNombre(),
+        request.getApellido(),
+        passwordEncoder.encode(request.getPassword())
+);
+
+// Asignar rol CLIENTE
+usuario.agregarRol(Rol.CLIENTE);
+
+// (opcional) vincular con cliente
+usuario.vincularCliente(clienteGuardado.getId());
+
+// Guardar usuario
+usuarioRepository.guardar(usuario);
+
+// Retornar response
+return mapearAResponse(clienteGuardado);
         // Retornar response
         return mapearAResponse(clienteGuardado);
     }

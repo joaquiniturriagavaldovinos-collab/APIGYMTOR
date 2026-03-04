@@ -21,6 +21,10 @@ public class RegistrarClienteRequest {
     @Email(message = "El email debe tener un formato válido")
     private String email;
 
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
+    private String password;
+
     @Pattern(
             regexp = "^\\+?[0-9]{8,15}$",
             message = "El teléfono debe tener entre 8 y 15 dígitos y puede incluir prefijo internacional"
