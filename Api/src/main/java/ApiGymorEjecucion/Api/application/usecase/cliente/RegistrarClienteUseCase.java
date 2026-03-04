@@ -10,7 +10,7 @@ import ApiGymorEjecucion.Api.domain.model.usuario.Usuario;
 import ApiGymorEjecucion.Api.domain.model.usuario.Rol;
 import ApiGymorEjecucion.Api.domain.repository.ClienteRepository;
 import ApiGymorEjecucion.Api.domain.repository.UsuarioRepository;
-+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,16 +20,16 @@ public class RegistrarClienteUseCase {
 
     private final ClienteRepository clienteRepository;
     private final UsuarioRepository usuarioRepository;
-+    private final BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public RegistrarClienteUseCase(
-            ClienteRepository clienteRepository,
-            UsuarioRepository usuarioRepository,
-+    ) {
-        this.clienteRepository = clienteRepository;
-        this.usuarioRepository = usuarioRepository;
-+        this.passwordEncoder = new BCryptPasswordEncoder();
-    }
+public RegistrarClienteUseCase(
+        ClienteRepository clienteRepository,
+        UsuarioRepository usuarioRepository
+) {
+    this.clienteRepository = clienteRepository;
+    this.usuarioRepository = usuarioRepository;
+    this.passwordEncoder = new BCryptPasswordEncoder();
+}
 
     public ClienteResponse ejecutar(RegistrarClienteRequest request) {
 
