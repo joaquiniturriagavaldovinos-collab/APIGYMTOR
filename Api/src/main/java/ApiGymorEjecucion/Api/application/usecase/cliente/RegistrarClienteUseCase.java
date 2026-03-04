@@ -8,7 +8,10 @@ import ApiGymorEjecucion.Api.domain.model.Cliente.DireccionEntrega;
 import ApiGymorEjecucion.Api.domain.model.Cliente.TipoCliente;
 import ApiGymorEjecucion.Api.domain.repository.ClienteRepository;
 import org.springframework.stereotype.Service;
-
+import ApiGymorEjecucion.Api.domain.model.usuario.Usuario;
+import ApiGymorEjecucion.Api.domain.model.usuario.Rol;
+import ApiGymorEjecucion.Api.domain.repository.UsuarioRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 /**
  * Caso de Uso: Registrar Cliente
  *
@@ -19,11 +22,16 @@ public class RegistrarClienteUseCase {
 
     private final ClienteRepository clienteRepository;
     private final UsuarioRepository usuarioRepository;
-    rivate final BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public RegistrarClienteUseCase(ClienteRepository clienteRepository) {
-        this.clienteRepository = clienteRepository;
-    }
+public RegistrarClienteUseCase(
+        ClienteRepository clienteRepository,
+        UsuarioRepository usuarioRepository
+) {
+    this.clienteRepository = clienteRepository;
+    this.usuarioRepository = usuarioRepository;
+    this.passwordEncoder = new BCryptPasswordEncoder();
+}
 
     /**
      * Registra un nuevo cliente
@@ -98,7 +106,6 @@ usuario.vincularCliente(clienteGuardado.getId());
 usuarioRepository.guardar(usuario);
 
 // Retornar response
-return mapearAResponse(clienteGuardado);
         // Retornar response
         return mapearAResponse(clienteGuardado);
     }
