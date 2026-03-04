@@ -8,6 +8,8 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+import ApiGymorEjecucion.Api.domain.repository.RolRepository;
+
 
 import java.util.UUID;
 
@@ -15,26 +17,52 @@ import java.util.UUID;
 public class DataInitializer implements ApplicationRunner {
 
     private final UsuarioRepository usuarioRepository;
+    private final RolRepository rolRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public DataInitializer(UsuarioRepository usuarioRepository) {
+    public DataInitializer(
+            UsuarioRepository usuarioRepository,
+            RolRepository rolRepository
+    ) {
         this.usuarioRepository = usuarioRepository;
+        this.rolRepository = rolRepository;
     }
 
-    @Override
-    public void run(ApplicationArguments args) {
-        if (!usuarioRepository.existePorEmail("admin@gymor.cl")) {
-            Usuario admin = Usuario.crear(
-                    UUID.randomUUID().toString(),
-                    "admin@gymor.cl",
-                    "Admin",
-                    "Gymor",
-                    passwordEncoder.encode("admin123")
-            );
-            Rol rolAdmin = Rol.crear("ROLE_ADMIN", "ROLE_ADMIN", "Administrador");
-            admin.agregarRol(rolAdmin);
-            usuarioRepository.guardar(admin);
-            System.out.println("✅ Admin creado: admin@gymor.cl / admin123");
-        }
+@Override
+public void run(ApplicationArguments args) {
+
+    Rol rolAdmin = rolRepository.buscarPorNombre("ROLE_ADMIN")
+            .orElseGet(() -> rolRepository.guardar(
+                    Rol.crear(
+                            UUID.randomUUID().toString(),
+                            "ROLE_ADMIN",
+                            "Administrador del sistema"
+                    )
+            ));
+
+    Rol rolCliente = rolRepository.buscarPorNombre("ROLE_CLIENTE")
+            .orElseGet(() -> rolRepository.guardar(
+                    Rol.crear(
+                            UUID.randomUUID().toString(),
+                            "ROLE_CLIENTE",
+                            "Cliente del sistema"
+                    )
+            ));
+
+    if (!usuarioRepository.existePorEmail("admin@gymor.cl")) {
+
+        Usuario admin = Usuario.crear(
+                UUID.randomUUID().toString(),
+                "admin@gymor.cl",
+                "Admin",
+                "Gymor",
+                passwordEncoder.encode("admin123")
+        );
+
+        admin.agregarRol(rolAdmin);
+        usuarioRepository.guardar(admin);
+
+        System.out.println("✅ Admin creado: admin@gymor.cl / admin123");
     }
+}
 }

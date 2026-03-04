@@ -13,21 +13,25 @@ import ApiGymorEjecucion.Api.domain.repository.UsuarioRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import ApiGymorEjecucion.Api.domain.repository.RolRepository;
+import java.util.UUID;
 @Service
 @Transactional
 public class RegistrarClienteUseCase {
 
     private final ClienteRepository clienteRepository;
     private final UsuarioRepository usuarioRepository;
+    private final RolRepository rolRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
 public RegistrarClienteUseCase(
         ClienteRepository clienteRepository,
-        UsuarioRepository usuarioRepository
+        UsuarioRepository usuarioRepository,
+        RolRepository rolRepository
 ) {
     this.clienteRepository = clienteRepository;
     this.usuarioRepository = usuarioRepository;
+    this.rolRepository = rolRepository;
     this.passwordEncoder = new BCryptPasswordEncoder();
 }
 
@@ -49,15 +53,15 @@ public RegistrarClienteUseCase(
 
         TipoCliente tipo = TipoCliente.valueOf(request.getTipo());
 
-        Cliente cliente = Cliente.crear(
-                null,
-                request.getNombre(),
-                request.getApellido(),
-                request.getEmail(),
-                request.getTelefono(),
-                request.getRut(),
-                tipo
-        );
+Cliente cliente = Cliente.crear(
+        UUID.randomUUID().toString(),
+        request.getNombre(),
+        request.getApellido(),
+        request.getEmail(),
+        request.getTelefono(),
+        request.getRut(),
+        tipo
+);
 
         if (request.getDireccion() != null) {
             DireccionEntrega direccion =
@@ -69,19 +73,15 @@ public RegistrarClienteUseCase(
         Cliente clienteGuardado = clienteRepository.guardar(cliente);
 
 Usuario usuario = Usuario.crear(
-        null,
+        UUID.randomUUID().toString(),
         request.getEmail(),
         request.getNombre(),
         request.getApellido(),
         passwordEncoder.encode(request.getPassword())
 );
 
-Rol rolCliente = Rol.crear(
-        java.util.UUID.randomUUID().toString(),
-        "CLIENTE",
-        "Rol para clientes del sistema"
-);
-
+Rol rolCliente = rolRepository.buscarPorNombre("ROLE_CLIENTE")
+        .orElseThrow(() -> new IllegalStateException("El rol CLIENTE no está configurado en el sistema"));
 usuario.agregarRol(rolCliente);
 
 usuarioRepository.guardar(usuario);
