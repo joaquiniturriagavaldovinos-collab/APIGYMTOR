@@ -6,63 +6,49 @@ import ApiGymorEjecucion.Api.application.dto.response.cliente.ClienteResponse;
 import ApiGymorEjecucion.Api.domain.model.Cliente.Cliente;
 import ApiGymorEjecucion.Api.domain.model.Cliente.DireccionEntrega;
 import ApiGymorEjecucion.Api.domain.model.Cliente.TipoCliente;
-import ApiGymorEjecucion.Api.domain.repository.ClienteRepository;
-import org.springframework.stereotype.Service;
 import ApiGymorEjecucion.Api.domain.model.usuario.Usuario;
 import ApiGymorEjecucion.Api.domain.model.usuario.Rol;
+import ApiGymorEjecucion.Api.domain.repository.ClienteRepository;
 import ApiGymorEjecucion.Api.domain.repository.UsuarioRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-/**
- * Caso de Uso: Registrar Cliente
- *
- * Registra un nuevo cliente en el sistema (minorista o mayorista)
- */
++import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
+@Transactional
 public class RegistrarClienteUseCase {
 
     private final ClienteRepository clienteRepository;
     private final UsuarioRepository usuarioRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
++    private final BCryptPasswordEncoder passwordEncoder;
 
-public RegistrarClienteUseCase(
-        ClienteRepository clienteRepository,
-        UsuarioRepository usuarioRepository
-) {
-    this.clienteRepository = clienteRepository;
-    this.usuarioRepository = usuarioRepository;
-    this.passwordEncoder = new BCryptPasswordEncoder();
-}
+    public RegistrarClienteUseCase(
+            ClienteRepository clienteRepository,
+            UsuarioRepository usuarioRepository,
++    ) {
+        this.clienteRepository = clienteRepository;
+        this.usuarioRepository = usuarioRepository;
++        this.passwordEncoder = new BCryptPasswordEncoder();
+    }
 
-    /**
-     * Registra un nuevo cliente
-     *
-     * @param request Datos del cliente a registrar
-     * @return Cliente registrado
-     */
     public ClienteResponse ejecutar(RegistrarClienteRequest request) {
 
-
-
-        // Validar request
         validarRequest(request);
 
-        // Verificar que no exista cliente con ese RUT
         if (clienteRepository.existePorRut(request.getRut())) {
             throw new IllegalArgumentException(
                     "Ya existe un cliente registrado con el RUT: " + request.getRut()
             );
         }
 
-        // Verificar que no exista cliente con ese email
         if (clienteRepository.existePorEmail(request.getEmail())) {
             throw new IllegalArgumentException(
                     "Ya existe un cliente registrado con el email: " + request.getEmail()
             );
         }
 
-        // Crear cliente en dominio
         TipoCliente tipo = TipoCliente.valueOf(request.getTipo());
-        
+
         Cliente cliente = Cliente.crear(
                 null,
                 request.getNombre(),
@@ -73,20 +59,14 @@ public RegistrarClienteUseCase(
                 tipo
         );
 
-        // Agregar dirección si viene en el request
         if (request.getDireccion() != null) {
             DireccionEntrega direccion =
                     crearDireccionDesdeRequest(request.getDireccion());
             cliente.agregarDireccion(direccion);
         }
 
-
-        // Persistir
+        // Guardar cliente
         Cliente clienteGuardado = clienteRepository.guardar(cliente);
-
-
-
-Cliente clienteGuardado = clienteRepository.guardar(cliente);
 
 Usuario usuario = Usuario.crear(
         null,
@@ -96,17 +76,16 @@ Usuario usuario = Usuario.crear(
         passwordEncoder.encode(request.getPassword())
 );
 
-// Asignar rol CLIENTE
-usuario.agregarRol(Rol.CLIENTE);
+Rol rolCliente = Rol.crear(
+        java.util.UUID.randomUUID().toString(),
+        "CLIENTE",
+        "Rol para clientes del sistema"
+);
 
-// (opcional) vincular con cliente
-usuario.vincularCliente(clienteGuardado.getId());
+usuario.agregarRol(rolCliente);
 
-// Guardar usuario
 usuarioRepository.guardar(usuario);
 
-// Retornar response
-        // Retornar response
         return mapearAResponse(clienteGuardado);
     }
 
@@ -120,11 +99,11 @@ usuarioRepository.guardar(usuario);
         if (request.getApellido() == null || request.getApellido().isBlank()) {
             throw new IllegalArgumentException("El apellido es requerido");
         }
-
-
-
         if (request.getEmail() == null || request.getEmail().isBlank()) {
             throw new IllegalArgumentException("El email es requerido");
+        }
+        if (!request.getEmail().contains("@")) {
+            throw new IllegalArgumentException("El email no tiene un formato válido");
         }
         if (request.getRut() == null || request.getRut().isBlank()) {
             throw new IllegalArgumentException("El RUT es requerido");
@@ -132,12 +111,10 @@ usuarioRepository.guardar(usuario);
         if (request.getTipo() == null || request.getTipo().isBlank()) {
             throw new IllegalArgumentException("El tipo de cliente es requerido");
         }
-        // Validar formato de email básico
-        if (!request.getEmail().contains("@")) {
-            throw new IllegalArgumentException("El email no tiene un formato válido");
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            throw new IllegalArgumentException("La contraseña es requerida");
         }
     }
-
 
     private DireccionEntrega crearDireccionDesdeRequest(DireccionRequest request) {
         return DireccionEntrega.crear(
@@ -150,7 +127,6 @@ usuarioRepository.guardar(usuario);
                 request.getReferencia()
         );
     }
-
 
     private ClienteResponse mapearAResponse(Cliente cliente) {
         ClienteResponse response = new ClienteResponse();
@@ -173,6 +149,4 @@ usuarioRepository.guardar(usuario);
 
         return response;
     }
-
-
 }
